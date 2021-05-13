@@ -1,2 +1,4 @@
 # don't commit
 node_modules/
+library.json
+.DS_Store
