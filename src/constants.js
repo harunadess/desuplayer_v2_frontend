@@ -1,4 +1,4 @@
-const serverUrl = 'http://192.168.0.12:4444';
+const serverUrl = 'http://127.0.0.1:4444';
 
 export const constants = {
 	server: `${serverUrl}/api`,
