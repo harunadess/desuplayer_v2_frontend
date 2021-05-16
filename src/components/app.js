@@ -1,11 +1,22 @@
 import { hot } from 'react-hot-loader/root';
 import React from 'react';
-import Player from './Player';
+import { extendTheme, ChakraProvider, ColorModeScript } from '@chakra-ui/react';
+import Main from './Main';
+
+const config = {
+    initialColorMode: 'dark',
+    useSystemColorMode: true
+};
+
+const theme = extendTheme({ config });
 
 function App() {
     return (
         <>
-			<Player/>
+            <ColorModeScript initialColorMode={theme.config.initialColorMode}/>
+            <ChakraProvider theme={theme}>
+                <Main/>
+            </ChakraProvider>
         </>
     );
 }
