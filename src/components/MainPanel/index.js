@@ -10,16 +10,14 @@ import ItemList from '../ItemList';
 import Player from '../Player';
 
 const MainPanel = () => {
-	const lastItemRef = useRef(null);
 	const [currentlyPlaying, setCurrentlyPlaying] = useState({});
 	const [audioSrc, setAudioSrc] = useState('');
 	const [library, setLibrary] = useState({});
 	const itemsIncrement = 20;
 	const [numItems, setNumItems] = useState(itemsIncrement);
-	const [isLoading, setIsLoading] = useState(true);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const getLibraryFile = () => {
-		setIsLoading(true);
 		return requests.get('library/get');
 	};
 
@@ -28,29 +26,8 @@ const MainPanel = () => {
 			setLibrary(res.data);
 		}).catch(error => {
 			console.error(error);
-		}).finally(() => {
-			setIsLoading(false);
 		});
 	}, []);
-
-	useEffect(() => {
-		const infiniteOptions = {
-			root: null,
-			rootMargin: '20px',
-			threshold: 1.0
-		};
-
-		const lastObserver = new IntersectionObserver(handleLastObserver, infiniteOptions);
-		if(lastItemRef.current)
-			lastObserver.observe(lastItemRef.current);
-	}, []);
-
-	const handleLastObserver = (entries) => {
-		const target = entries[0];
-		if(target.isIntersecting) {
-			setNumItems((currentItems) => currentItems + itemsIncrement);
-		}
-	};
 
 	const onInfiniteScrollBottom = () => {
 		setNumItems((currentItems) => currentItems + itemsIncrement);
@@ -58,7 +35,7 @@ const MainPanel = () => {
 
 	const buildLibrary = () => {
 		setIsLoading(true);
-		requests.get('library/build', { musicDir: 'D:/Jorta/Music', images: false })
+		requests.get('library/build', { musicDir: 'D:/Users/Jorta/Music', images: false })
 		.then(res => {
 			setLibrary(res.data);
 		}).catch(console.error)
@@ -68,7 +45,6 @@ const MainPanel = () => {
 	};
 
 	const onClickLibraryItem = (itemKey) => {
-		setIsLoading(true);
 		requests.get('music/get', { key: itemKey }, 'blob')
 		.then(res => {
 			setCurrentlyPlaying(library[itemKey]);
@@ -77,48 +53,40 @@ const MainPanel = () => {
 			console.log(format, track);
 			const trackURL = window.URL.createObjectURL(track);
 			setAudioSrc(trackURL);
-			setIsLoading(false);
 		}).catch(console.error);
 	};
 
 	return (
 		<>
-			{isLoading &&
-				<Grid
-					gap={6}
-					maxH={'80vh'}
-					overflowY={'auto'}
-					templateColumns={'repeat(3, 1fr)'}
+			<Box overflow={'auto'} maxH={'100vh'}>
+				<VStack
+					align={'stretch'}
+					divider={<StackDivider borderColor={'gray.200'}/>}
+					spacing={4}
 				>
-					{[1,2,3,4,5].map(i => {
-						return (
-							<React.Fragment key={`skeleton_loading_${i}`}>
-								<GridItem>
-									<Skeleton/>
-								</GridItem>
-								<GridItem>
-									<Skeleton/>
-								</GridItem>
-								<GridItem>
-									<Skeleton/>
-								</GridItem>
-							</React.Fragment>
-						);
-					})}
-				</Grid>
-			}
-			{!isLoading &&
-				<Box overflow={'auto'} maxH={'100vh'}>
-					<VStack
-						align={'stretch'}
-						divider={<StackDivider borderColor={'gray.200'}/>}
-						spacing={4}
-					>
-						<Box>
-							<Text hidden={!isLoading} padding={'2'} margin={'4'}>-- Api Request in Progress -- </Text>
-							<Button onClick={buildLibrary} margin={'4'}>Build Library</Button>
-							<Button onClick={getLibraryFile} margin={'4'} marginLeft={'0'}>Get Library File</Button>
-						</Box>
+					<Box>
+						<Button onClick={buildLibrary} margin={'4'}>Build Library</Button>
+						<Button onClick={getLibraryFile} margin={'4'} marginLeft={'0'}>Get Library File</Button>
+					</Box>
+					{isLoading &&
+						<Grid
+						gap={6}
+						maxH={'80vh'}
+						overflowY={'auto'}
+						templateColumns={'repeat(3, 1fr)'}
+						>
+							{[1,2,3,4,5].map(i => {
+								return (
+									<React.Fragment key={`skeleton_loading_${i}`}>
+										<GridItem><Skeleton color={'blackAlpha.300'} width={'320px'} height={'120px'}/></GridItem>
+										<GridItem><Skeleton color={'blackAlpha.300'} width={'320px'} height={'120px'}/></GridItem>
+										<GridItem><Skeleton color={'blackAlpha.300'} width={'320px'} height={'120px'}/></GridItem>
+									</React.Fragment>
+								);
+							})}
+						</Grid>
+					}
+					{!isLoading &&
 						<ItemList
 							displayKeys={['Album', 'Artist', 'FileType', 'Title', 'Year']}
 							infiniteScroll
@@ -128,13 +96,13 @@ const MainPanel = () => {
 							onClickItem={onClickLibraryItem}
 							onInfiniteScrollBottom={onInfiniteScrollBottom}
 						/>
-						<Player
+					}
+					<Player
 						currentlyPlaying={currentlyPlaying}
 						source={audioSrc}
-						/>
-					</VStack>
-				</Box>
-			}
+					/>
+				</VStack>
+			</Box>
 		</>
 	);
 };
