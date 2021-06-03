@@ -18,7 +18,7 @@ const Main = () => {
                 templateColumns={"repeat(12, 1fr)"}
             >
                 <GridItem colSpan={2}>
-                    <SideBar items={sidebarItems}/>
+                    <SideBar itemKey={'key'} items={sidebarItems}/>
                 </GridItem>
                 <GridItem colSpan={10} overflowY={'auto'}>
                     <MainPanel/>

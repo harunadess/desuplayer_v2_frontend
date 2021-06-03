@@ -1,32 +1,42 @@
 import { Button } from '@chakra-ui/button';
-import { Grid, GridItem } from '@chakra-ui/layout';
-import { StackDivider } from '@chakra-ui/layout';
+import { AspectRatio, StackDivider } from '@chakra-ui/layout';
 import { VStack } from '@chakra-ui/layout';
-import { Box, Text } from '@chakra-ui/layout';
-import { Skeleton } from '@chakra-ui/skeleton';
-import React, { useState, useEffect, useRef } from 'react';
+import { Box } from '@chakra-ui/layout';
+import React, { useState, useEffect } from 'react';
 import * as requests from '../../helpers/request';
-import ItemList from '../ItemList';
+import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/tabs';
 import Player from '../Player';
+import { Image } from '@chakra-ui/image';
+import { typography } from '@chakra-ui/styled-system';
+import { Text } from '@chakra-ui/layout';
+import { Grid } from '@chakra-ui/layout';
+import { GridItem } from '@chakra-ui/layout';
+import InfiniteScrollList from '../InfiniteScrollList';
 
+// TODO: Currently, you have no idea what the fuck you're doing with the front end or how you want to display things
+// you want to have things split out into tabs, but I'm not sure tbh how this is going to work.
+// we need some way of accessing each of the possible groups of things
+// (maybe object of arrays with a key for each, and we know what tab we're on.. or something)
 const MainPanel = () => {
+	// These are global things that need shared across the entire application
 	const [currentlyPlaying, setCurrentlyPlaying] = useState({});
 	const [audioSrc, setAudioSrc] = useState('');
-	const [library, setLibrary] = useState({});
-	const itemsIncrement = 20;
+	const [albums, setArtists] = useState([]);
+	const itemsIncrement = 8;
 	const [numItems, setNumItems] = useState(itemsIncrement);
 	const [isLoading, setIsLoading] = useState(false);
-
-	const getLibraryFile = () => {
-		return requests.get('library/get');
-	};
+	const [tabIdx, setTabIdx] = useState(0);
 
 	useEffect(() => {
-		getLibraryFile().then(res => {
-			setLibrary(res.data);
-		}).catch(error => {
-			console.error(error);
-		});
+		requests.get('music/getAllArtists', {})
+		.then(res => {
+			setArtists(
+				Object.keys(res.data).map(artistKey => {
+					const albums = res.data[artistKey].Albums;
+					return Object.keys(albums).map(a => ({ ...albums[a], Artist: res.data[artistKey].Name }));
+				}).flat()
+			);
+		}).catch(console.error);
 	}, []);
 
 	const onInfiniteScrollBottom = () => {
@@ -35,75 +45,95 @@ const MainPanel = () => {
 
 	const buildLibrary = () => {
 		setIsLoading(true);
-		requests.get('library/build', { musicDir: 'D:/Users/Jorta/Music', images: false })
+		requests.get('library/build', { musicDir: '/mnt/d/Users/Jorta/Music', images: false })
 		.then(res => {
-			setLibrary(res.data);
+			setArtists(res.data);
 		}).catch(console.error)
 		.finally(() => {
 			setIsLoading(false);
 		});
 	};
 
-	const onClickLibraryItem = (itemKey) => {
-		requests.get('music/get', { key: itemKey }, 'blob')
-		.then(res => {
-			setCurrentlyPlaying(library[itemKey]);
-			const format = res.headers['content-type'];
-			const track = new Blob([res.data], { type: format });
-			console.log(format, track);
-			const trackURL = window.URL.createObjectURL(track);
-			setAudioSrc(trackURL);
-		}).catch(console.error);
-	};
+	useEffect(() => {
+		// items = string => Artist
+		// Artist = string, string => Album
+		// Album = string, string, string, string, string => Song
+		// Song =  
+		console.log('albums', albums);
+	}, [albums]);
 
 	return (
-		<>
-			<Box overflow={'auto'} maxH={'100vh'}>
-				<VStack
-					align={'stretch'}
-					divider={<StackDivider borderColor={'gray.200'}/>}
-					spacing={4}
+		<Box overflow={'auto'} maxH={'100vh'}>
+			<VStack
+				align={'stretch'}
+				divider={<StackDivider borderColor={'gray.200'}/>}
+				spacing={4}
+			>
+				<Button onClick={buildLibrary} margin={'4'}>Build Library</Button>
+				<Tabs
+					onChange={(i) => setTabIdx(i)}
+					isFitted
+					isLazy
 				>
-					<Box>
-						<Button onClick={buildLibrary} margin={'4'}>Build Library</Button>
-						<Button onClick={getLibraryFile} margin={'4'} marginLeft={'0'}>Get Library File</Button>
-					</Box>
-					{isLoading &&
-						<Grid
-						gap={6}
-						maxH={'80vh'}
-						overflowY={'auto'}
-						templateColumns={'repeat(3, 1fr)'}
-						>
-							{[1,2,3,4,5].map(i => {
-								return (
-									<React.Fragment key={`skeleton_loading_${i}`}>
-										<GridItem><Skeleton color={'blackAlpha.300'} width={'320px'} height={'120px'}/></GridItem>
-										<GridItem><Skeleton color={'blackAlpha.300'} width={'320px'} height={'120px'}/></GridItem>
-										<GridItem><Skeleton color={'blackAlpha.300'} width={'320px'} height={'120px'}/></GridItem>
-									</React.Fragment>
-								);
-							})}
-						</Grid>
-					}
-					{!isLoading &&
-						<ItemList
-							displayKeys={['Album', 'Artist', 'FileType', 'Title', 'Year']}
-							infiniteScroll
-							items={Object.keys(library).slice(0, numItems).map(k => library[k])}
-							itemKey={'Key'}
-							listType={'shitty'}
-							onClickItem={onClickLibraryItem}
-							onInfiniteScrollBottom={onInfiniteScrollBottom}
-						/>
-					}
-					<Player
-						currentlyPlaying={currentlyPlaying}
-						source={audioSrc}
-					/>
-				</VStack>
-			</Box>
-		</>
+					<TabList>
+						<Tab>
+							Artists
+						</Tab>
+						<Tab>
+							Albums
+						</Tab>
+						<Tab>
+							Songs
+						</Tab>
+					</TabList>
+					<TabPanels>
+						<TabPanel>
+							<InfiniteScrollList onInfiniteScrollBottom={onInfiniteScrollBottom}>
+								<Grid 
+									templateColumns={'repeat(4, 1fr)'}
+									gap={4}
+									maxH={'80vh'}
+									maxW={'80vw'}
+									overflowY={'auto'}
+								>
+									{
+										albums.slice(0, numItems).map(album => {
+											return (
+												<GridItem maxW={200}>
+													{album.Picturedata?.length > 1 &&
+														<AspectRatio ratio={1}>
+															<Image
+																src={`data:${album.Picturetype};base64,${album.Picturedata}`}
+																objectFit={'cover'}
+															/>
+														</AspectRatio>
+													}
+													{album.Picturedata?.length <= 1 &&
+														<Box w={200} h={200} background={'gray.500'} />
+													}
+													
+													<Text>{album.Title} - {album.Artist}</Text>
+												</GridItem>
+											);
+										})
+									}
+								</Grid>
+							</InfiniteScrollList>
+						</TabPanel>
+						<TabPanel>
+							{/* <AlbumPanel/> */}
+						</TabPanel>
+						<TabPanel>
+							{/* <Song Panel/> */}
+						</TabPanel>
+					</TabPanels>
+				</Tabs>
+				<Player
+					currentlyPlaying={currentlyPlaying}
+					source={audioSrc}
+				/>
+			</VStack>
+		</Box>
 	);
 };
 
