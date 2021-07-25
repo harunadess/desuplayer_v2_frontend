@@ -1,17 +1,12 @@
 import { Button } from '@chakra-ui/button';
-import { AspectRatio, StackDivider } from '@chakra-ui/layout';
+import { Input } from '@chakra-ui/input';
+import { StackDivider } from '@chakra-ui/layout';
 import { VStack } from '@chakra-ui/layout';
 import { Box } from '@chakra-ui/layout';
 import React, { useState, useEffect } from 'react';
 import * as requests from '../../helpers/request';
-import { Tab, TabList, TabPanel, TabPanels, Tabs } from '@chakra-ui/tabs';
 import Player from '../Player';
-import { Image } from '@chakra-ui/image';
-import { typography } from '@chakra-ui/styled-system';
-import { Text } from '@chakra-ui/layout';
-import { Grid } from '@chakra-ui/layout';
-import { GridItem } from '@chakra-ui/layout';
-import InfiniteScrollList from '../InfiniteScrollList';
+import ItemList from '../ItemList'
 
 // TODO: Currently, you have no idea what the fuck you're doing with the front end or how you want to display things
 // you want to have things split out into tabs, but I'm not sure tbh how this is going to work.
@@ -24,8 +19,23 @@ const MainPanel = () => {
 	const [albums, setArtists] = useState([]);
 	const itemsIncrement = 8;
 	const [numItems, setNumItems] = useState(itemsIncrement);
-	const [isLoading, setIsLoading] = useState(false);
-	const [tabIdx, setTabIdx] = useState(0);
+	const [isLoading, setIsLoading] = useState(true);
+
+	const getAlbums = () => {
+		setIsLoading(true);
+		return requests.get('library/get');
+	};
+
+
+	useEffect(() => {
+		getAlbums().then(res => {
+			setLibrary(res.data);
+		}).catch(error => {
+			console.error(error);
+		}).finally(() => {
+			setIsLoading(false);
+		});
+	}, []);
 
 	useEffect(() => {
 		requests.get('music/getAllArtists', {})
@@ -54,14 +64,6 @@ const MainPanel = () => {
 		});
 	};
 
-	useEffect(() => {
-		// items = string => Artist
-		// Artist = string, string => Album
-		// Album = string, string, string, string, string => Song
-		// Song =  
-		console.log('albums', albums);
-	}, [albums]);
-
 	return (
 		<Box overflow={'auto'} maxH={'100vh'}>
 			<VStack
@@ -70,68 +72,35 @@ const MainPanel = () => {
 				spacing={4}
 			>
 				<Button onClick={buildLibrary} margin={'4'}>Build Library</Button>
-				<Tabs
-					onChange={(i) => setTabIdx(i)}
-					isFitted
-					isLazy
-				>
-					<TabList>
-						<Tab>
-							Artists
-						</Tab>
-						<Tab>
-							Albums
-						</Tab>
-						<Tab>
-							Songs
-						</Tab>
-					</TabList>
-					<TabPanels>
-						<TabPanel>
-							<InfiniteScrollList onInfiniteScrollBottom={onInfiniteScrollBottom}>
-								<Grid 
-									templateColumns={'repeat(4, 1fr)'}
-									gap={4}
-									maxH={'80vh'}
-									maxW={'80vw'}
-									overflowY={'auto'}
-								>
-									{
-										albums.slice(0, numItems).map(album => {
-											return (
-												<GridItem maxW={200}>
-													{album.Picturedata?.length > 1 &&
-														<AspectRatio ratio={1}>
-															<Image
-																src={`data:${album.Picturetype};base64,${album.Picturedata}`}
-																objectFit={'cover'}
-															/>
-														</AspectRatio>
-													}
-													{album.Picturedata?.length <= 1 &&
-														<Box w={200} h={200} background={'gray.500'} />
-													}
-													
-													<Text>{album.Title} - {album.Artist}</Text>
-												</GridItem>
-											);
-										})
-									}
-								</Grid>
-							</InfiniteScrollList>
-						</TabPanel>
-						<TabPanel>
-							{/* <AlbumPanel/> */}
-						</TabPanel>
-						<TabPanel>
-							{/* <Song Panel/> */}
-						</TabPanel>
-					</TabPanels>
-				</Tabs>
-				<Player
-					currentlyPlaying={currentlyPlaying}
-					source={audioSrc}
-				/>
+			{!isLoading &&
+				<Box overflow={'auto'} maxH={'100vh'}>
+					<VStack
+						align={'stretch'}
+						divider={<StackDivider borderColor={'gray.200'}/>}
+						spacing={4}
+					>
+						<Box>
+							<Text hidden={!isLoading} padding={'2'} margin={'4'}>-- Api Request in Progress -- </Text>
+							<Input type={'text'} value={musicDir} onChange={(event) => setMusicDir(event.target.value)}/>
+							<Button onClick={buildLibrary} margin={'4'}>Build</Button>
+							<Button onClick={getAlbums} margin={'4'} marginLeft={'0'}>Manual Get</Button>
+						</Box>
+						<ItemList
+							displayKeys={['Title', 'Artist']}
+							infiniteScroll
+							items={Object.keys(library).slice(0, numItems).map(k => library[k])}
+							itemKey={'Path'}
+							listType={'shitty'}
+							onClickItem={onClickLibraryItem}
+							onInfiniteScrollBottom={onInfiniteScrollBottom}
+						/>
+						<Player
+						currentlyPlaying={currentlyPlaying}
+						source={audioSrc}
+						/>
+					</VStack>
+				</Box>
+			}
 			</VStack>
 		</Box>
 	);
