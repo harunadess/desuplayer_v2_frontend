@@ -3,6 +3,7 @@ import { Input } from '@chakra-ui/input';
 import { StackDivider } from '@chakra-ui/layout';
 import { VStack } from '@chakra-ui/layout';
 import { Box } from '@chakra-ui/layout';
+import { Text } from '@chakra-ui/react';
 import React, { useState, useEffect } from 'react';
 import * as requests from '../../helpers/request';
 import Player from '../Player';
@@ -16,10 +17,11 @@ const MainPanel = () => {
 	// These are global things that need shared across the entire application
 	const [currentlyPlaying, setCurrentlyPlaying] = useState({});
 	const [audioSrc, setAudioSrc] = useState('');
-	const [albums, setArtists] = useState([]);
+	const [library, setLibrary] = useState([]);
 	const itemsIncrement = 8;
 	const [numItems, setNumItems] = useState(itemsIncrement);
 	const [isLoading, setIsLoading] = useState(true);
+	const [musicDir, setMusicDir] = useState('D:/Jorta/Music/Alestorm');
 
 	const getAlbums = () => {
 		setIsLoading(true);
@@ -40,12 +42,7 @@ const MainPanel = () => {
 	useEffect(() => {
 		requests.get('music/getAllArtists', {})
 		.then(res => {
-			setArtists(
-				Object.keys(res.data).map(artistKey => {
-					const albums = res.data[artistKey].Albums;
-					return Object.keys(albums).map(a => ({ ...albums[a], Artist: res.data[artistKey].Name }));
-				}).flat()
-			);
+			setLibrary(res.data);
 		}).catch(console.error);
 	}, []);
 
@@ -55,7 +52,7 @@ const MainPanel = () => {
 
 	const buildLibrary = () => {
 		setIsLoading(true);
-		requests.get('library/build', { musicDir: '/mnt/d/Users/Jorta/Music', images: false })
+		requests.get('library/build', { musicDir: musicDir, images: false })
 		.then(res => {
 			setArtists(res.data);
 		}).catch(console.error)
@@ -91,7 +88,7 @@ const MainPanel = () => {
 							items={Object.keys(library).slice(0, numItems).map(k => library[k])}
 							itemKey={'Path'}
 							listType={'shitty'}
-							onClickItem={onClickLibraryItem}
+							onClickItem={() => {}}
 							onInfiniteScrollBottom={onInfiniteScrollBottom}
 						/>
 						<Player
