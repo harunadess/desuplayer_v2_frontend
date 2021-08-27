@@ -12,15 +12,14 @@ const sidebarItems = [
 
 const Main = () => {
     return (
-        <Flex flex={1} maxHeight={'100vh'}>
+        <Flex flex={1}>
             <Grid
                 gap={6}
                 templateColumns={"repeat(12, 1fr)"}
             >
-                <GridItem colSpan={2}>
-                    <SideBar itemKey={'key'} items={sidebarItems}/>
+                <GridItem colSpan={1}>
                 </GridItem>
-                <GridItem colSpan={10} overflowY={'auto'}>
+                <GridItem colSpan={11} overflowY={'auto'}>
                     <MainPanel/>
                 </GridItem>
             </Grid>

@@ -62,9 +62,6 @@ const Player = (props) => {
 							<SliderTrack>
 								<SliderFilledTrack />
 							</SliderTrack>
-							<SliderThumb color={'gray'}>
-								<Box color={'black'} as={MdGraphicEq}/>
-							</SliderThumb>
 						</Slider>
 					</Center>
 				</GridItem>

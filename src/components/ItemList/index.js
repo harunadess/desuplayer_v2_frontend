@@ -10,7 +10,6 @@ const ItemList = (props) => {
         className,
         infiniteScroll,
         items,
-        itemKey,
         onClickItem,
         onInfiniteScrollBottom
     }  = props;
@@ -35,9 +34,9 @@ const ItemList = (props) => {
 			overflowY={'auto'}
 			templateColumns={'repeat(3, 1fr)'}
 		>
-			{items.map(item => {
+			{items.map((item, idx) => {
 				return (
-					<GridItem boxSize={boxSize} key={`${item.Title}_${item.Artist}`} onClick={() => onClickItem(item)}>
+					<GridItem boxSize={boxSize} key={`${item.Title}_${item.Artist}_${idx}`} onClick={() => onClickItem(item)}>
 						<Center>
 							<Image margin={'auto'} src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} />
 						</Center>
@@ -53,7 +52,6 @@ const ItemList = (props) => {
 
 ItemList.propTypes = {
     className: propTypes.string,
-    displayKeys: propTypes.arrayOf(propTypes.string).isRequired,
     infiniteScroll: propTypes.bool,
     items: propTypes.arrayOf(propTypes.object).isRequired,
     listType: propTypes.string,
