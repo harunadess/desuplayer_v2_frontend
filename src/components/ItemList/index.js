@@ -8,11 +8,9 @@ const ItemList = (props) => {
     const boxSize = 250;
     const {
         className,
-        displayKeys,
         infiniteScroll,
         items,
         itemKey,
-        listType,
         onClickItem,
         onInfiniteScrollBottom
     }  = props;
@@ -30,34 +28,27 @@ const ItemList = (props) => {
             onInfiniteScrollBottom();
     };
 
-    const renderDefaultList = () => {
-        return (
-            <Grid
-                gap={6}
-                maxH={'80vh'}
-                overflowY={'auto'}
-                templateColumns={'repeat(3, 1fr)'}
-            >
-                {items.map(item => {
-                    return (
-                        <GridItem boxSize={boxSize} key={`${item.Title}_${item.Artist}_${item.Path}`} onClick={() => onClickItem(item[itemKey])}>
-                            <Center>
-                                <Image margin={'auto'} src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} />
-                            </Center>
-                            <Text fontSize={'lg'} textAlign={'center'}>{item.Title}</Text>
-                            <Text fontSize={'lg'} textAlign={'center'}>{item.Artist}</Text>
-                        </GridItem>
-                    );
-                })}
-                {infiniteScroll && <Box id={'bottomOfList'} h={40} ref={bottomOfListRef}/>}
-            </Grid>
-        );
-    };
-
-    switch(listType) {
-        default:
-            return renderDefaultList();
-    }
+	return (
+		<Grid
+			gap={6}
+			maxH={'80vh'}
+			overflowY={'auto'}
+			templateColumns={'repeat(3, 1fr)'}
+		>
+			{items.map(item => {
+				return (
+					<GridItem boxSize={boxSize} key={`${item.Title}_${item.Artist}`} onClick={() => onClickItem(item)}>
+						<Center>
+							<Image margin={'auto'} src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} />
+						</Center>
+						<Text fontSize={'lg'} textAlign={'center'}>{item.Title}</Text>
+						<Text fontSize={'lg'} textAlign={'center'}>{item.Artist}</Text>
+					</GridItem>
+				);
+			})}
+			{infiniteScroll && <Box id={'bottomOfList'} h={40} ref={bottomOfListRef}/>}
+		</Grid>
+	);
 };
 
 ItemList.propTypes = {

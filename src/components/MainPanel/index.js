@@ -3,15 +3,13 @@ import { Input } from '@chakra-ui/input';
 import { StackDivider } from '@chakra-ui/layout';
 import { VStack } from '@chakra-ui/layout';
 import { Box } from '@chakra-ui/layout';
+import { Drawer, DrawerBody, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerOverlay, DrawerFooter } from '@chakra-ui/react';
 import { Text } from '@chakra-ui/react';
 import React, { useState, useEffect } from 'react';
 import * as requests from '../../helpers/request';
 import Player from '../Player';
-import ItemList from '../ItemList'
+import ItemList from '../ItemList';
 
-// TODO: Currently, you have no idea what the fuck you're doing with the front end or how you want to display things
-// you want to have things split out into tabs, but I'm not sure tbh how this is going to work.
-// we need some way of accessing each of the possible groups of things
 // (maybe object of arrays with a key for each, and we know what tab we're on.. or something)
 const MainPanel = () => {
 	// These are global things that need shared across the entire application
@@ -21,13 +19,14 @@ const MainPanel = () => {
 	const itemsIncrement = 8;
 	const [numItems, setNumItems] = useState(itemsIncrement);
 	const [isLoading, setIsLoading] = useState(true);
-	const [musicDir, setMusicDir] = useState('D:/Jorta/Music/Alestorm');
+	const [musicDir, setMusicDir] = useState('D:/Users/Jorta/Music/Alestorm');
+	const [selectedAlbum, setSelectedAlbum] = useState({});
+	const [selectedSong, setSelectedSong] = useState({});
 
 	const getAlbums = () => {
 		setIsLoading(true);
-		return requests.get('library/get');
+		return requests.get('music/getAllArtists');
 	};
-
 
 	useEffect(() => {
 		getAlbums().then(res => {
@@ -48,27 +47,45 @@ const MainPanel = () => {
 
 	const onInfiniteScrollBottom = () => {
 		setNumItems((currentItems) => currentItems + itemsIncrement);
-	}
+	};
 
 	const buildLibrary = () => {
 		setIsLoading(true);
-		requests.get('library/build', { musicDir: musicDir, images: false })
+		requests.get('library/build', { musicDir: musicDir })
 		.then(res => {
-			setArtists(res.data);
+			setLibrary(res.data);
 		}).catch(console.error)
 		.finally(() => {
 			setIsLoading(false);
 		});
 	};
 
+	const onClickAlbum = (item) => {
+		console.log('clicked ->', item);
+		setSelectedAlbum(item);
+	};
+
+	const onClickSong = (item) => {
+		console.log('clicked =>', item);
+		setSelectedSong(item);
+
+		// todo: remove
+		requests.get('music/getSong', { path: item.Path }, 'blob')
+		.then(res => {
+			console.log(res);
+
+			const format = res.headers['content-type'];
+			const track = new Blob([res.data], { type: format });
+			console.log(format, track);
+			const trackURL = window.URL.createObjectURL(track);
+			console.log(trackURL);
+			setAudioSrc(trackURL);
+		}).catch(console.error)
+	};
+
 	return (
 		<Box overflow={'auto'} maxH={'100vh'}>
-			<VStack
-				align={'stretch'}
-				divider={<StackDivider borderColor={'gray.200'}/>}
-				spacing={4}
-			>
-				<Button onClick={buildLibrary} margin={'4'}>Build Library</Button>
+			<Button onClick={buildLibrary} margin={'4'}>Build Library</Button>
 			{!isLoading &&
 				<Box overflow={'auto'} maxH={'100vh'}>
 					<VStack
@@ -83,12 +100,10 @@ const MainPanel = () => {
 							<Button onClick={getAlbums} margin={'4'} marginLeft={'0'}>Manual Get</Button>
 						</Box>
 						<ItemList
-							displayKeys={['Title', 'Artist']}
 							infiniteScroll
-							items={Object.keys(library).slice(0, numItems).map(k => library[k])}
+							items={library.slice(0, numItems)}
 							itemKey={'Path'}
-							listType={'shitty'}
-							onClickItem={() => {}}
+							onClickItem={onClickAlbum}
 							onInfiniteScrollBottom={onInfiniteScrollBottom}
 						/>
 						<Player
@@ -98,7 +113,30 @@ const MainPanel = () => {
 					</VStack>
 				</Box>
 			}
-			</VStack>
+			{selectedAlbum.Title !== undefined &&
+				<Drawer isOpen={selectedAlbum.Title} placement={'right'} onClose={() => { setSelectedAlbum({}) }} size={'md'}>
+					<DrawerOverlay />
+					<DrawerContent>
+						<DrawerCloseButton />
+						<DrawerHeader>
+							{selectedAlbum.Title}
+						</DrawerHeader>
+						<DrawerBody>
+							<VStack>
+								{Object.keys(selectedAlbum.Songs).map(key => {
+									const song = selectedAlbum.Songs[key];
+									return (
+										<Button colorScheme={'gray'} key={key} variant={'ghost'} onClick={() => { onClickSong(song) }} fontSize={'md'}>
+											{song.Tracknumber}. {song.Title}
+										</Button>
+									);
+								})}
+							</VStack>
+						</DrawerBody>
+						<DrawerFooter />
+					</DrawerContent>
+				</Drawer>
+			}
 		</Box>
 	);
 };
