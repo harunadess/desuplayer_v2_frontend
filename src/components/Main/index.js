@@ -17,9 +17,7 @@ const Main = () => {
                 gap={6}
                 templateColumns={"repeat(12, 1fr)"}
             >
-                <GridItem colSpan={1}>
-                </GridItem>
-                <GridItem colSpan={11} overflowY={'auto'}>
+                <GridItem colSpan={12} overflowY={'auto'} padding={4}>
                     <MainPanel/>
                 </GridItem>
             </Grid>

@@ -36,12 +36,21 @@ const ItemList = (props) => {
 		>
 			{items.map((item, idx) => {
 				return (
-					<GridItem boxSize={boxSize} key={`${item.Title}_${item.Artist}_${idx}`} onClick={() => onClickItem(item)}>
+					<GridItem boxSize={boxSize} key={`${item.Title}_${item.Artist}_${idx}`} padding={'2'} margin={'4'} onClick={() => onClickItem(item)}>
 						<Center>
-							<Image margin={'auto'} src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} />
+							{(item.Picturetype && item.Picturedata) &&
+								<Image margin={'auto'} src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} />
+							}
+							{(!item.Picturetype || !item.Picturedata) &&
+								<Box margin={'auto'} width={'200px'} h={'200px'} backgroundColor={'gray.200'}>
+									<Center>
+										<Text fontWeight={'bold'}>No image available</Text>
+									</Center>
+								</Box>
+							}
 						</Center>
-						<Text fontSize={'lg'} textAlign={'center'}>{item.Title}</Text>
-						<Text fontSize={'lg'} textAlign={'center'}>{item.Artist}</Text>
+						<Text fontSize={'md'} textAlign={'center'}>{item.Title || 'No Title available'}</Text>
+						<Text fontSize={'md'} textAlign={'center'}>{item.Artist || 'No Artist available'}</Text>
 					</GridItem>
 				);
 			})}

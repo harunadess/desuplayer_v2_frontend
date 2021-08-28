@@ -29,7 +29,7 @@ const Player = (props) => {
 	};
 
 	return (
-		<div>
+		<Box>
 			<audio autoPlay={false} src={source} ref={audioRef} />
 			<Grid
 				gap={2}
@@ -74,7 +74,7 @@ const Player = (props) => {
 					}
 				</GridItem>
 			</Grid>
-		</div>
+		</Box>
 	);
 };
 
