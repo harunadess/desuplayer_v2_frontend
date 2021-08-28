@@ -65,11 +65,10 @@ const Player = (props) => {
 						</Slider>
 					</Center>
 				</GridItem>
-				<GridItem colSpan={3}>
-					{currentlyPlaying?.Key &&
+				<GridItem colSpan={6}>
+					{currentlyPlaying?.Path &&
 						<Box>
-							<Text fontSize={'small'} >{currentlyPlaying.Title}</Text>
-							<Text fontSize={'small'}>{currentlyPlaying.Artist} - {currentlyPlaying.Album}</Text>
+							<Text fontSize={'small'} >{currentlyPlaying.Title} - {currentlyPlaying.Artist ? `${currentlyPlaying.Artist}` : 'Unknown Artist'}{currentlyPlaying.Album ? ` (${currentlyPlaying.Album})` : ''}</Text>
 						</Box> 
 					}
 				</GridItem>

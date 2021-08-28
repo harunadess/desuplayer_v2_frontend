@@ -98,14 +98,14 @@ const MainPanel = () => {
 		requests.setApi(value);
 	};
 
-	// todo: should probably be paginated list instead of infinite scroll list
+	// todo: the next thing you need to look at is fixing infinite scrolling
 	return (
 		<Box>
 			<HStack spacing={'4'} margin={'8'}>
 				<Text></Text>
 				<InputGroup size={'sm'}>
 					<InputLeftAddon children={'http://'} />
-					<Input maxW={'50%'} placeholder={'127.0.0.1:4444'} value={server} onChange={(event) => onChangeApi(event.target.value)}/>
+					<Input maxW={'50%'} placeholder={constants.server} value={server} onChange={(event) => onChangeApi(event.target.value)}/>
 				</InputGroup>
 				<Input maxW={'50%'} size={'sm'} type={'text'} value={musicDir} onChange={(event) => setMusicDir(event.target.value)}/>
 				<Button size={'sm'} onClick={buildLibrary} margin={'4'}>Build</Button>
@@ -145,7 +145,7 @@ const MainPanel = () => {
 							onInfiniteScrollBottom={onInfiniteScrollBottom}
 						/>
 						<Player
-						currentlyPlaying={currentlyPlaying}
+						currentlyPlaying={selectedSong}
 						source={audioSrc}
 						/>
 					</VStack>
