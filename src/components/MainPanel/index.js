@@ -113,7 +113,7 @@ const MainPanel = () => {
 				<Button size={'sm'} onClick={getAlbums} margin={'4'}>Manual Get</Button>
 			</HStack>
 			{isLoading &&
-				<Box w={'100vw'} h={'100vh'}>
+				<Box>
 					<Center>
 						<Text align={'center'}>
 							Loading...
@@ -122,7 +122,7 @@ const MainPanel = () => {
 				</Box>
 			}
 			{!isLoading && library.length === 0 &&
-				<Box w={'100vw'} h={'100vh'}>
+				<Box>
 					<Center>
 						<Text align={'center'}>
 							Library failed to load, or is empty.<br />
@@ -132,25 +132,27 @@ const MainPanel = () => {
 				</Box>
 			}
 			{!isLoading && library.length > 0 &&
-				<Box overflow={'auto'}>
-					<VStack
-						align={'stretch'}
-						divider={<StackDivider borderColor={'gray.200'}/>}
-						spacing={4}
-					>
-						<ItemList
-							infiniteScroll
-							items={library}
-							itemKey={'Path'}
-							onClickItem={onClickAlbum}
-							onInfiniteScrollBottom={onInfiniteScrollBottom}
-						/>
-						<Player
-						currentlyPlaying={selectedSong}
-						source={audioSrc}
-						/>
-					</VStack>
-				</Box>
+				<VStack
+					align={'stretch'}
+					divider={<StackDivider borderColor={'gray.200'}/>}
+					spacing={4}
+					w={'100vw'}
+					h={'90vh'}
+					padding={'4'}
+					overflow={'hidden'}
+				>
+					<ItemList
+						infiniteScroll
+						items={library}
+						itemKey={'Path'}
+						onClickItem={onClickAlbum}
+						onInfiniteScrollBottom={onInfiniteScrollBottom}
+					/>
+					<Player
+					currentlyPlaying={selectedSong}
+					source={audioSrc}
+					/>
+				</VStack>
 			}
 			{selectedAlbum.Title !== undefined &&
 				<Drawer isOpen={selectedAlbum.Title !== undefined} placement={'right'} onClose={() => { setSelectedAlbum({}) }} size={'sm'}>

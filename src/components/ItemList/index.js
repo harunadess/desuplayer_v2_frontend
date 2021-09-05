@@ -3,9 +3,13 @@ import { FixedSizeGrid } from 'react-window';
 import { Box, Center, Text } from '@chakra-ui/layout';
 import { Image } from '@chakra-ui/image';
 import propTypes from 'prop-types';
+import { forwardRef } from '@chakra-ui/react';
 
 const ItemList = (props) => {
 	const boxSize = 250;
+	const defaultSize = 200;
+	const defaultTextOffset = 84;
+	const extraPad = 32;
 
 	const {
 		items,
@@ -28,35 +32,53 @@ const ItemList = (props) => {
 			columnCount={layout.cols}
 			rowCount={layout.rows}
 			columnWidth={boxSize}
-			rowHeight={boxSize}
+			rowHeight={boxSize + extraPad}
 			width={window.innerWidth || 0}
 			height={window.innerHeight || 0}
 			itemCount={items.length}
+			innerElementType={ItemElem}
+			style={{
+				marginLeft: '3%'
+			}}
 		>
 			{({rowIndex, columnIndex, style}) => {
 				const item = items[rowIndex + columnIndex];
 				return (
-					<Box key={`${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} padding={'2'} margin={'4'} w={boxSize} h={boxSize} onClick={() => { onClickItem(item) }} style={style}>
-						<Center>
-							{(item.Picturetype && item.Picturedata) &&
-								<Image margin={'auto'} src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} />
-							}
-							{(!item.Picturetype || !item.Picturedata) &&
-								<Box margin={'auto'} width={'200px'} h={'200px'} backgroundColor={'gray.200'}>
-									<Center>
-										<Text margin={'auto'} fontWeight={'bold'}>No image available</Text>
-									</Center>
-								</Box>
-							}
-						</Center>
-						<Text fontSize={'md'} textAlign={'center'}>{item.Title || 'No Title available'}</Text>
-						<Text fontSize={'md'} textAlign={'center'}>{item.Artist || 'No Artist available'}</Text>
+					<Box key={`${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} padding={'2'} margin={'4'} w={boxSize} h={boxSize}
+						 onClick={() => { onClickItem(item) }} style={style}
+					>
+						{(item.Picturetype && item.Picturedata) &&
+							<Image margin={'auto'} src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} />
+						}
+						{(!item.Picturetype || !item.Picturedata) &&
+							<Box margin={'auto'} width={defaultSize} h={defaultSize} backgroundColor={'gray.200'}>
+								<Text paddingTop={defaultTextOffset} align={'center'} fontWeight={'bold'}>No image available</Text>
+							</Box>
+						}
+						<Text fontSize={'md'} textAlign={'center'} textOverflow={'ellipsis'} overflow={'hidden'}>
+							{item.Title || 'No Title available'}<br />
+							{item.Artist || 'No Artist available'}
+						</Text>
 					</Box>
 				);
 			}}
 		</FixedSizeGrid>
 	);
 };
+
+const ItemElem = forwardRef(({ style, ...rest }, ref) => {
+	return (
+		<div
+			ref={ref}
+			style={{
+				...style,
+				padding: '0.5rem',
+				margin: '1rem'
+			}}
+			{...rest}
+		/>
+	);
+});
 
 ItemList.propTypes = {
     infiniteScroll: propTypes.bool,
