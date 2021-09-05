@@ -35,7 +35,6 @@ const MainPanel = () => {
 	const itemsIncrement = 9;
 	const [numItems, setNumItems] = useState(itemsIncrement);
 	const [isLoading, setIsLoading] = useState(true);
-	
 
 	const getAlbums = () => {
 		setIsLoading(true);
@@ -43,6 +42,7 @@ const MainPanel = () => {
 	};
 
 	useEffect(() => {
+		requests.setApi(server);
 		getAlbums().then(res => {
 			setLibrary(res.data);
 		}).catch(error => {
@@ -101,13 +101,14 @@ const MainPanel = () => {
 	// todo: the next thing you need to look at is fixing infinite scrolling
 	return (
 		<Box>
-			<HStack spacing={'4'} margin={'8'}>
-				<Text></Text>
+			<HStack spacing={'2'} margin={'4'}>
+				<Text>Server</Text>
 				<InputGroup size={'sm'}>
 					<InputLeftAddon children={'http://'} />
-					<Input maxW={'50%'} placeholder={constants.server} value={server} onChange={(event) => onChangeApi(event.target.value)}/>
+					<Input maxW={'30%'} placeholder={constants.server} value={server} onChange={(event) => onChangeApi(event.target.value)}/>
 				</InputGroup>
-				<Input maxW={'50%'} size={'sm'} type={'text'} value={musicDir} onChange={(event) => setMusicDir(event.target.value)}/>
+				<Text>Music Root:</Text>
+				<Input maxW={'30%'} size={'sm'} type={'text'} value={musicDir} onChange={(event) => setMusicDir(event.target.value)}/>
 				<Button size={'sm'} onClick={buildLibrary} margin={'4'}>Build</Button>
 				<Button size={'sm'} onClick={getAlbums} margin={'4'}>Manual Get</Button>
 			</HStack>
@@ -125,7 +126,7 @@ const MainPanel = () => {
 					<Center>
 						<Text align={'center'}>
 							Library failed to load, or is empty.<br />
-							Check server is running at {server} and that your music root is correct.
+							Check server is running at http://{server} and that your music root is correct.
 						</Text>
 					</Center>
 				</Box>
@@ -139,7 +140,7 @@ const MainPanel = () => {
 					>
 						<ItemList
 							infiniteScroll
-							items={library.slice(0, numItems)}
+							items={library}
 							itemKey={'Path'}
 							onClickItem={onClickAlbum}
 							onInfiniteScrollBottom={onInfiniteScrollBottom}

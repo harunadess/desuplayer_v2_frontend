@@ -1,42 +1,42 @@
-import { Box, Center, Grid, GridItem } from '@chakra-ui/layout';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
+import { FixedSizeGrid } from 'react-window';
+import { Box, Center, Text } from '@chakra-ui/layout';
+import { Image } from '@chakra-ui/image';
 import propTypes from 'prop-types';
-import { Image, Text } from '@chakra-ui/react'
 
 const ItemList = (props) => {
-    const bottomOfListRef = useRef(null);
-    const boxSize = 250;
-    const {
-        className,
-        infiniteScroll,
-        items,
-        onClickItem,
-        onInfiniteScrollBottom
-    }  = props;
+	const boxSize = 250;
 
-    useEffect(() => {
-        const options = { root: null, rootMargin: '20px', threshold: 1.0 };
-        const observer = new IntersectionObserver(handleIntersection, options);
-        if(bottomOfListRef.current)
-            observer.observe(bottomOfListRef.current);
-    }, []);
+	const {
+		items,
+		onClickItem,
+		onInfiniteScrollBottom
+	} = props;
 
-    const handleIntersection = (entries) => {
-        const target = entries[0];
-        if(target.isIntersecting)
-            onInfiniteScrollBottom();
-    };
+	const [layout, setLayout] = useState({ cols: 1, rows: 1 });
+
+	useEffect(() => {
+		const cols = window.innerWidth / boxSize;
+		setLayout({
+			cols: Math.floor(cols),
+			rows: Math.ceil((items?.length || 1) / cols)
+		});
+	}, [items.length, window.innerWidth]);
 
 	return (
-		<Grid
-			gap={6}
-			maxH={'80vh'}
-			overflowY={'auto'}
-			templateColumns={'repeat(3, 1fr)'}
+		<FixedSizeGrid
+			columnCount={layout.cols}
+			rowCount={layout.rows}
+			columnWidth={boxSize}
+			rowHeight={boxSize}
+			width={window.innerWidth || 0}
+			height={window.innerHeight || 0}
+			itemCount={items.length}
 		>
-			{items.map((item, idx) => {
+			{({rowIndex, columnIndex, style}) => {
+				const item = items[rowIndex + columnIndex];
 				return (
-					<GridItem boxSize={boxSize} key={`${item.Title}_${item.Artist}_${idx}`} padding={'2'} margin={'4'} onClick={() => onClickItem(item)}>
+					<Box key={`${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} padding={'2'} margin={'4'} w={boxSize} h={boxSize} onClick={() => { onClickItem(item) }} style={style}>
 						<Center>
 							{(item.Picturetype && item.Picturedata) &&
 								<Image margin={'auto'} src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} />
@@ -44,23 +44,21 @@ const ItemList = (props) => {
 							{(!item.Picturetype || !item.Picturedata) &&
 								<Box margin={'auto'} width={'200px'} h={'200px'} backgroundColor={'gray.200'}>
 									<Center>
-										<Text fontWeight={'bold'}>No image available</Text>
+										<Text margin={'auto'} fontWeight={'bold'}>No image available</Text>
 									</Center>
 								</Box>
 							}
 						</Center>
 						<Text fontSize={'md'} textAlign={'center'}>{item.Title || 'No Title available'}</Text>
 						<Text fontSize={'md'} textAlign={'center'}>{item.Artist || 'No Artist available'}</Text>
-					</GridItem>
+					</Box>
 				);
-			})}
-			{infiniteScroll && <Box id={'bottomOfList'} h={40} ref={bottomOfListRef}/>}
-		</Grid>
+			}}
+		</FixedSizeGrid>
 	);
 };
 
 ItemList.propTypes = {
-    className: propTypes.string,
     infiniteScroll: propTypes.bool,
     items: propTypes.arrayOf(propTypes.object).isRequired,
     listType: propTypes.string,
