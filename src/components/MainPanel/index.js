@@ -9,6 +9,7 @@ import Player from '../Player';
 import ItemList from '../ItemList';
 import { constants } from '../../constants';
 import LibraryConfig from '../LibraryConfig';
+import AlbumDrawer from '../AlbumDrawer';
 
 // (maybe object of arrays with a key for each, and we know what tab we're on.. or something)
 
@@ -134,32 +135,7 @@ const MainPanel = () => {
           />
         </VStack>
       }
-      {selectedAlbum.Title !== undefined &&
-        <Drawer isOpen={selectedAlbum.Title !== undefined} placement='right' onClose={() => { setSelectedAlbum({}) }} size='sm'>
-          <DrawerOverlay />
-          <DrawerContent>
-            <DrawerCloseButton />
-            <DrawerHeader>
-              {selectedAlbum.Title || 'No Title available'}
-            </DrawerHeader>
-            <DrawerBody>
-              <VStack divider={<StackDivider borderColor='gray.200' />}>
-                {Object.keys(selectedAlbum.Songs).map(key => {
-                  const song = selectedAlbum.Songs[key];
-                  return (
-                    <Box key={key}>
-                      <Text appearance='button' fontWeight='semibold' maxW='100%' onClick={() => { onClickSong(song) }}>
-                        {song.Tracknumber ? `${song.Tracknumber}.` : ''} {song.Title || song.Path}
-                      </Text>
-                    </Box>
-                  );
-                })}
-              </VStack>
-            </DrawerBody>
-            <DrawerFooter />
-          </DrawerContent>
-        </Drawer>
-      }
+      <AlbumDrawer onClickSong={onClickSong} selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />
     </Box>
   );
 };

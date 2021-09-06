@@ -2,7 +2,7 @@ import { constants } from '../constants';
 import axios from 'axios';
 let baseUrl = constants.server;
 
-const maxSize = 1024 * 1024 * 1024;
+const maxSize = 1024*1024*1024;
 
 export const setApi = (server) => {
   baseUrl = `http://${server}/api`;
