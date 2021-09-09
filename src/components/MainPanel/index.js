@@ -1,13 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { StackDivider, VStack, Box } from '@chakra-ui/layout';
-import {
-  Drawer, DrawerBody, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerOverlay, DrawerFooter,
-  Center, Text
-} from '@chakra-ui/react';
+import { Center, Text } from '@chakra-ui/react';
 import * as requests from '../../helpers/request';
 import Player from '../Player';
 import ItemList from '../ItemList';
-import { constants } from '../../constants';
+import { constants, contextMenuOptions } from '../../constants';
 import LibraryConfig from '../LibraryConfig';
 import AlbumDrawer from '../AlbumDrawer';
 
@@ -29,6 +26,7 @@ const MainPanel = () => {
   const [musicDir, setMusicDir] = useState('D:/Users/Jorta/Music');
   const [selectedAlbum, setSelectedAlbum] = useState({});
   const [selectedSong, setSelectedSong] = useState({});
+  const [contextMenu, setContextMenu] = useState(contextMenuOptions);
   const [playlist, setPlaylist] = useState([]);
 
   // display
@@ -48,6 +46,14 @@ const MainPanel = () => {
     }).finally(() => {
       setIsLoading(false);
     });
+
+    setContextMenu((contextMenu) => {
+      return {
+        play: { ...contextMenu.play, action: onPlay },
+        playNext: { ...contextMenu.playNext, action: onPlayNext },
+        addToQueue: { ...contextMenu.addToQueue, action: onAddToQueue }
+      }
+    });
   }, []);
 
   useEffect(() => {
@@ -56,6 +62,10 @@ const MainPanel = () => {
         setLibrary(res.data);
       }).catch(console.error);
   }, []);
+
+  useEffect(() => {
+    console.log('playlist updated', playlist);
+  }, [playlist]);
 
   const buildLibrary = () => {
     setIsLoading(true);
@@ -73,11 +83,11 @@ const MainPanel = () => {
     setSelectedAlbum(item);
   };
 
+  // todo: remove or rethink this
   const onClickSong = (item) => {
     console.log('clicked song =>', item);
     setSelectedSong(item);
 
-    // todo: remove or rethink this
     requests.get('music/getSong', { path: item.Path }, 'blob')
       .then(res => {
         const format = res.headers['content-type'];
@@ -90,6 +100,30 @@ const MainPanel = () => {
   const onChangeApi = (value) => {
     setServer(value);
     requests.setApi(value);
+  };
+
+  // todo: other playery things
+  const onPlay = (items) => {
+    if(Array.isArray(items))
+      setPlaylist(items);
+    else
+      setPlaylist([items]);
+  };
+
+  // todo: other playery things
+  const onPlayNext = (items) => {
+    if(Array.isArray(items))
+      setPlaylist((playlist) => [].concat(...items, ...playlist));
+    else
+      setPlaylist((playlist) => [].concat(items, ...playlist));
+  };
+
+  // todo: other playery things
+  const onAddToQueue = (items) => {
+    if(Array.isArray(items))
+     setPlaylist((playlist) => [].concat(...playlist, ...items));
+    else
+      setPlaylist((playlist) => [].concat(...playlist, items));
   };
 
   // todo: loading skeleton
@@ -128,6 +162,7 @@ const MainPanel = () => {
           <ItemList
             items={library}
             onClickItem={onClickAlbum}
+            contextMenuOptions={contextMenu}
           />
           <Player
             currentlyPlaying={selectedSong}
@@ -135,7 +170,7 @@ const MainPanel = () => {
           />
         </VStack>
       }
-      <AlbumDrawer onClickSong={onClickSong} selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} />
+      <AlbumDrawer selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} contextMenuOptions={contextMenu} />
     </Box>
   );
 };
