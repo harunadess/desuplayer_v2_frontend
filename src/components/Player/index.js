@@ -12,6 +12,12 @@ import { ButtonGroup } from '@chakra-ui/button';
 
 import { default as musicApi } from '../../api/music';
 
+/*
+  Todo: figure out how player events are going to work
+  Since the playerState is async, you might need some kinda useEffect with something that
+  manages updates based on player events (start, stop, end or whatever) and then do things based on that
+  (like fetch new song, etc.)
+*/
 const Player = (props) => {
   const { playlist, setPlaylist } = props;
 
@@ -24,23 +30,27 @@ const Player = (props) => {
     previouslyPlayed: []
   });
 
+  const initialPlay = () => {
+    const current = { ...playlist[0] };
+    setPlayerState({ ...playerState, currentSong: current });
+    musicApi.getSong(current.Path).then((songData) => {
+      setPlayerState({
+        ...playerState,
+        currentSong: current,
+        source: window.URL.createObjectURL(songData),
+        isPlaying: !playerState.isPlaying
+      });
+      audioRef.current.play();
+    });
+  };
+
   const onClickPlayPause = () => {
-    if (isPlaying) {
+    if (playerState.isPlaying) {
       audioRef.current.pause();
       setPlayerState({ ...playerState, isPlaying: !playerState.isPlaying });
     } else {
       if(!playerState.currentSong || !playerState.source) {
-        const current = { ...playlist[0] };
-        setPlayerState({ ...playerState, currentSong: current });
-        musicApi.getSong(current.Path).then((songData) => {
-          setPlayerState({
-            ...playerState,
-            currentSong: current,
-            source: window.URL.createObjectURL(songData),
-            isPlaying: !playerState.isPlaying
-          });
-          audioRef.current.play();
-        });
+        initialPlay();
       } else {
         audioRef.current.play();
         setPlayerState({ ...playerState, isPlaying: !playerState.isPlaying });
@@ -49,13 +59,26 @@ const Player = (props) => {
   };
 
   const onChangeVolume = (value) => {
-    audioRef.current.volume = value;
+    audioRef.current.volume = (value*0.01);
+  };
+
+  const onSongEnd = () => {
+    const ended = playerState.currentSong;
+    setPlaylist(playlist.slice(1));
+    setPlayerState({
+      ...playerState,
+      currentSong: undefined,
+      source: '',
+      isPlaying: false,
+      previouslyPlayed: playerState.previouslyPlayed.push(ended)
+    });
+    onClickPlayPause();
   };
 
   return (
     <Box>
       {playerState.source &&
-        <audio autoPlay={false} src={playerState.source} ref={audioRef} />
+        <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={onSongEnd} />
       }
       <Grid
         gap={2}
@@ -81,9 +104,9 @@ const Player = (props) => {
           <Center height={'100%'} width={'100%'}>
             <Slider
               min={0}
-              max={1}
+              max={100}
               onChange={onChangeVolume}
-              step={0.01}
+              step={1}
             >
               <SliderTrack>
                 <SliderFilledTrack />

@@ -10,7 +10,7 @@ const getAllArtists = async () => {
 const getSong = async (path) => {
   const response = await get(`${base}/getSong`, { path: path }, 'blob');
   const format = response.headers['content-type'];
-  const songData = new Blob([res.data], { type: format });
+  const songData = new Blob([response.data], { type: format });
   return songData;
 };
 
