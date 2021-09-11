@@ -15,7 +15,8 @@ const ItemList = (props) => {
   const {
     items,
     onClickItem,
-    contextMenuOptions
+    contextMenuOptions,
+    setSelected
   } = props;
 
   // todo: see if this can be refactored any
@@ -45,8 +46,7 @@ const ItemList = (props) => {
     rows: 1,
     data: [ [ { } ] ]
   });
-  const [menuOpen, setMenuOpen] = useState(false);
-
+  
   useEffect(() => {
     const cols = window.innerWidth / boxSize;
     const newLayout = {
@@ -61,9 +61,7 @@ const ItemList = (props) => {
   }, [items.length, window.innerWidth]);
 
   const onAuxClick = (item) => {
-    const open = menuOpen;
-    !open ? setSelected(item) : setSelected({});
-    setMenuOpen(!open);
+    setSelected(item);
   };
 
   return (
@@ -84,7 +82,7 @@ const ItemList = (props) => {
           const item = layout.data[columnIndex][rowIndex];
           if (!item) return null;
           return (
-            <Box key={`${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} padding='2' margin='4' w={boxSize} h={boxSize}
+            <Box key={`${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} padding='2' margin='4' w={boxSize} h={boxSize} cursor='pointer'
               onClick={() => onClickItem(item)} style={style} onAuxClick={() => onAuxClick(item)}
             >
               {(item.Picturetype && item.Picturedata) &&

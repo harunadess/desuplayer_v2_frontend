@@ -1,5 +1,5 @@
 import { hot } from 'react-hot-loader/root';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { extendTheme, ChakraProvider, ColorModeScript } from '@chakra-ui/react';
 import { Box } from '@chakra-ui/layout';
 import Main from './Main';
@@ -11,9 +11,22 @@ const config = {
 
 const theme = extendTheme({ config });
 
-console.log('sizing', window.innerWidth, window.innerHeight);
+const preventContextMenu = (event) => {
+  event.preventDefault();
+};
 
-function App() {
+const App = () => {
+
+  useEffect(() => {
+    console.log('sizing', window.innerWidth, window.innerHeight);
+
+    document.addEventListener('contextmenu', preventContextMenu);
+
+    return (() => {
+      document.removeEventListener('contextmenu', preventContextMenu);
+    });
+  }, []);
+
   return (
     <Box>
       <ColorModeScript initialColorMode={theme.config.initialColorMode} />
@@ -22,6 +35,6 @@ function App() {
       </ChakraProvider>
     </Box>
   );
-}
+};
 
 export default hot(App);

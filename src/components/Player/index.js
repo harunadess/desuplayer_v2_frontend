@@ -1,5 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import propTypes from 'prop-types';
+
 import { IconButton } from '@chakra-ui/button';
 import { Box } from '@chakra-ui/layout';
 import { Slider, SliderTrack, SliderFilledTrack, SliderThumb } from '@chakra-ui/slider';
@@ -9,18 +10,41 @@ import { Center } from '@chakra-ui/layout';
 import { Text } from '@chakra-ui/layout';
 import { ButtonGroup } from '@chakra-ui/button';
 
+import { default as musicApi } from '../../api/music';
+
 const Player = (props) => {
-  const { currentlyPlaying, source } = props;
+  const { playlist, setPlaylist } = props;
+
   const audioRef = useRef(null);
-  const [isPlaying, setIsPlaying] = useState(false);
+
+  const [playerState, setPlayerState] = useState({
+    currentSong: undefined,
+    source: '',
+    isPlaying: false,
+    previouslyPlayed: []
+  });
 
   const onClickPlayPause = () => {
     if (isPlaying) {
       audioRef.current.pause();
-      setIsPlaying(!isPlaying)
+      setPlayerState({ ...playerState, isPlaying: !playerState.isPlaying });
     } else {
-      audioRef.current.play();
-      setIsPlaying(!isPlaying);
+      if(!playerState.currentSong || !playerState.source) {
+        const current = { ...playlist[0] };
+        setPlayerState({ ...playerState, currentSong: current });
+        musicApi.getSong(current.Path).then((songData) => {
+          setPlayerState({
+            ...playerState,
+            currentSong: current,
+            source: window.URL.createObjectURL(songData),
+            isPlaying: !playerState.isPlaying
+          });
+          audioRef.current.play();
+        });
+      } else {
+        audioRef.current.play();
+        setPlayerState({ ...playerState, isPlaying: !playerState.isPlaying });
+      }
     }
   };
 
@@ -30,7 +54,9 @@ const Player = (props) => {
 
   return (
     <Box>
-      <audio autoPlay={false} src={source} ref={audioRef} />
+      {playerState.source &&
+        <audio autoPlay={false} src={playerState.source} ref={audioRef} />
+      }
       <Grid
         gap={2}
         templateColumns={'repeat(12, 1fr)'}
@@ -42,7 +68,7 @@ const Player = (props) => {
               onClick={() => console.log('previous')}
             />
             <IconButton
-              icon={isPlaying ? <MdPause /> : <MdPlayArrow />}
+              icon={playerState.isPlaying ? <MdPause /> : <MdPlayArrow />}
               onClick={onClickPlayPause}
             />
             <IconButton
@@ -66,20 +92,17 @@ const Player = (props) => {
           </Center>
         </GridItem>
         <GridItem colSpan={6}>
-          {currentlyPlaying?.Path &&
+          {playerState.currentlyPlaying?.Path &&
             <Box>
-              <Text fontSize={'small'} >{currentlyPlaying.Title} - {currentlyPlaying.Artist ? `${currentlyPlaying.Artist}` : 'Unknown Artist'}{currentlyPlaying.Album ? ` (${currentlyPlaying.Album})` : ''}</Text>
+              <Text fontSize={'small'} >
+                {playerState.currentlyPlaying.Title} - {playerState.currentlyPlaying.Artist ? `${playerState.currentlyPlaying.Artist}` : 'Unknown Artist'}{playerState.currentlyPlaying.Album ? ` (${playerState.currentlyPlaying.Album})` : ''}
+              </Text>
             </Box>
           }
         </GridItem>
       </Grid>
     </Box>
   );
-};
-
-Player.propTypes = {
-  currentlyPlaying: propTypes.object.isRequired,
-  source: propTypes.string
 };
 
 export default Player;

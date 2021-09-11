@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { StackDivider, VStack, Box } from '@chakra-ui/layout';
 import { Center, Text } from '@chakra-ui/react';
 import * as requests from '../../helpers/request';
+import { default as libraryApi } from '../../api/library';
+import { default as musicApi } from '../../api/music';
 import Player from '../Player';
 import ItemList from '../ItemList';
 import { constants, contextMenuOptions } from '../../constants';
@@ -17,30 +19,20 @@ const MainPanel = () => {
   // api
   const [server, setServer] = useState(constants.serverOrigin);
 
-  // audio stuff
-  const [currentlyPlaying, setCurrentlyPlaying] = useState({});
-  const [audioSrc, setAudioSrc] = useState('');
-
   // library 
   const [library, setLibrary] = useState([]);
   const [musicDir, setMusicDir] = useState('D:/Users/Jorta/Music');
-  const [selectedAlbum, setSelectedAlbum] = useState({});
-  const [selectedSong, setSelectedSong] = useState({});
+  const [selected, setSelected] = useState({});
   const [contextMenu, setContextMenu] = useState(contextMenuOptions);
   const [playlist, setPlaylist] = useState([]);
 
   // display
   const [isLoading, setIsLoading] = useState(true);
 
-  const getAlbums = () => {
-    setIsLoading(true);
-    return requests.get('music/getAllArtists');
-  };
-
   useEffect(() => {
     requests.setApi(server);
-    getAlbums().then(res => {
-      setLibrary(res.data);
+    musicApi.getAllArtists().then(data => {
+      setLibrary(data);
     }).catch(error => {
       console.error(error);
     }).finally(() => {
@@ -56,22 +48,11 @@ const MainPanel = () => {
     });
   }, []);
 
-  useEffect(() => {
-    requests.get('music/getAllArtists', {})
-      .then(res => {
-        setLibrary(res.data);
-      }).catch(console.error);
-  }, []);
-
-  useEffect(() => {
-    console.log('playlist updated', playlist);
-  }, [playlist]);
-
   const buildLibrary = () => {
     setIsLoading(true);
-    requests.get('library/build', { musicDir: musicDir })
-      .then(res => {
-        setLibrary(res.data);
+    libraryApi.build(musicDir)
+      .then(data => {
+        setLibrary(data);
       }).catch(console.error)
       .finally(() => {
         setIsLoading(false);
@@ -80,13 +61,13 @@ const MainPanel = () => {
 
   const onClickAlbum = (item) => {
     console.log('clicked album ->', item);
-    setSelectedAlbum(item);
+    setSelected(item);
   };
 
   // todo: remove or rethink this
   const onClickSong = (item) => {
     console.log('clicked song =>', item);
-    setSelectedSong(item);
+    setSelected(item);
 
     requests.get('music/getSong', { path: item.Path }, 'blob')
       .then(res => {
@@ -127,9 +108,10 @@ const MainPanel = () => {
   };
 
   // todo: loading skeleton
+  // todo: change album menu to only open on single click (separate state, not just check if selected album)
   return (
     <Box>
-      <LibraryConfig buildLibrary={buildLibrary} getAlbums={getAlbums} onChangeApi={onChangeApi} musicDir={musicDir} setMusicDir={setMusicDir} server={server} />
+      <LibraryConfig buildLibrary={buildLibrary} getAlbums={musicApi.getAllArtists} onChangeApi={onChangeApi} musicDir={musicDir} setMusicDir={setMusicDir} server={server} />
       {isLoading &&
         <Box>
           <Center>
@@ -150,27 +132,13 @@ const MainPanel = () => {
         </Box>
       }
       {!isLoading && library.length > 0 &&
-        <VStack
-          align='stretch'
-          divider={<StackDivider borderColor='gray.200' />}
-          spacing='4'
-          w='100vw'
-          h='90vh'
-          padding='4'
-          overflow='hidden'
-        >
+        <VStack align='stretch' divider={<StackDivider borderColor='gray.200' />} spacing='4' w='100vw' h='90vh' padding='4' overflow='hidden'>
           <ItemList
-            items={library}
-            onClickItem={onClickAlbum}
-            contextMenuOptions={contextMenu}
-          />
-          <Player
-            currentlyPlaying={selectedSong}
-            source={audioSrc}
-          />
+            items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} setSelected={setSelected} />
+          <Player playlist={playlist} setPlaylist={setPlaylist} />
         </VStack>
       }
-      <AlbumDrawer selectedAlbum={selectedAlbum} setSelectedAlbum={setSelectedAlbum} contextMenuOptions={contextMenu} />
+      <AlbumDrawer selectedAlbum={selected} setSelectedAlbum={setSelected} contextMenuOptions={contextMenu} />
     </Box>
   );
 };

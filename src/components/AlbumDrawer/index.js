@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Drawer, DrawerBody, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerOverlay, DrawerFooter,
-  SimpleGrid, Box, Text
-} from '@chakra-ui/react';
+import { Drawer, DrawerBody, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerOverlay, DrawerFooter, SimpleGrid, Text } from '@chakra-ui/react';
 import ContextMenu from '../ContextMenu';
 
 const gridWidths = {
@@ -30,6 +28,8 @@ const AlbumDrawer = (props) => {
     });
   }, [selectedAlbum]);
 
+  // todo: potentially change out SimpleGrid/Text for something better
+  // so you can adjust column widths
   return (
     <Drawer isOpen={selectedAlbum?.Title !== undefined} placement='right' onClose={() => setSelectedAlbum({})} size='md'>
       <DrawerOverlay />
@@ -37,20 +37,20 @@ const AlbumDrawer = (props) => {
         <DrawerCloseButton />
         <DrawerHeader>{selectedAlbum?.Title || 'No Title available'}</DrawerHeader>
         <DrawerBody>
-          <SimpleGrid columns={4} spacing={2} w='100%'>
-            <Box><Text size='md'>#</Text></Box>
-            <Box><Text size='md'>Title</Text></Box>
-            <Box><Text size='md'>Atrist</Text></Box>
-            <Box><Text size='md'>Format</Text></Box>
+          <SimpleGrid columns={4} spacing={1} w='100%'>
+            <Text size='md'>No.</Text>
+            <Text size='md'>Title</Text>
+            <Text size='md'>Atrist</Text>
+            <Text size='md'>Format</Text>
           </SimpleGrid>
             {songs.map(song => {
               return (
-                <ContextMenu elementType={SimpleGrid} options={contextMenuOptions} itemData={song}>
-                  <SimpleGrid columns={4} spacing={2} w='100%' marginTop={2} marginBottom={2}>
-                    <Box><Text size='md'>{song.Tracknumber}</Text></Box>
-                    <Box><Text size='md'>{song.Title}</Text></Box>
-                    <Box><Text size='md'>{song.Artist}</Text></Box>
-                    <Box><Text size='md'>{song.Filetype}</Text></Box>
+                <ContextMenu key={`ContextMenu_for_${song.Path}`} elementType={SimpleGrid} options={contextMenuOptions} itemData={song}>
+                  <SimpleGrid columns={4} spacing={1} w='100%' marginTop={2} marginBottom={2}>
+                    <Text cursor='pointer' size='md'>{song.Tracknumber}</Text>
+                    <Text cursor='pointer' size='md'>{song.Title}</Text>
+                    <Text cursor='pointer' size='md'>{song.Artist}</Text>
+                    <Text cursor='pointer' size='md'>{song.Filetype}</Text>
                   </SimpleGrid>
                 </ContextMenu>
               );
