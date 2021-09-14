@@ -133,8 +133,7 @@ const MainPanel = () => {
       }
       {!isLoading && library.length > 0 &&
         <VStack align='stretch' divider={<StackDivider borderColor='gray.200' />} spacing='4' w='100vw' h='90vh' padding='4' overflow='hidden'>
-          <ItemList
-            items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} setSelected={setSelected} />
+          <ItemList items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} setSelected={setSelected} />
           <Player playlist={playlist} setPlaylist={setPlaylist} />
         </VStack>
       }
