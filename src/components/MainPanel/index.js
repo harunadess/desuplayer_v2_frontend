@@ -24,7 +24,24 @@ const MainPanel = () => {
   const [musicDir, setMusicDir] = useState('D:/Users/Jorta/Music');
   const [selected, setSelected] = useState({});
   const [contextMenu, setContextMenu] = useState(contextMenuOptions);
-  const [playlist, setPlaylist] = useState([]);
+  const [playlist, setPlaylist] = useState([
+    {
+      "Title": "Red fraction (Game Version)",
+      "Artist": "Afterglow",
+      "Discnumber": 0,
+      "Tracknumber": 1,
+      "Filetype": "MP3",
+      "Path": "D:\\Users\\Jorta\\Music\\Bandori\\Red_fraction_Game_Version_.mp3"
+    },
+    {
+      "Title": "Scarlet Sky (Game Version)",
+      "Artist": "Afterglow",
+      "Discnumber": 0,
+      "Tracknumber": 1,
+      "Filetype": "MP3",
+      "Path": "D:\\Users\\Jorta\\Music\\Bandori\\Scarlet_Sky_Game_Version_.mp3"
+    }
+  ]);
 
   // display
   const [isLoading, setIsLoading] = useState(true);

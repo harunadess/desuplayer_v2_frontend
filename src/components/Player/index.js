@@ -12,6 +12,7 @@ import { ButtonGroup } from '@chakra-ui/button';
 import { Image } from '@chakra-ui/image';
 
 import { default as musicApi } from '../../api/music';
+import { playerStates } from '../../constants';
 
 const maxHeight = 100;
 const layoutSizes = {
@@ -21,10 +22,12 @@ const layoutSizes = {
 };
 
 /*
-  Todo: figure out how player events are going to work
-  Since the playerState is async, you might need some kinda useEffect with something that
-  manages updates based on player events (start, stop, end or whatever) and then do things based on that
-  (like fetch new song, etc.)
+  Skip forward and back are being weird
+  It may be better to just have an index you use on playlist
+  This way if it's updated in some way, it shouldn't let the player's internal logic
+  get out of sync of the external playlist
+
+  TODO: keep event based model, but rewrite play/sk_fwd/sk_bk
 */
 const Player = (props) => {
   const { playlist, setPlaylist } = props;
@@ -33,62 +36,123 @@ const Player = (props) => {
 
   const [playerState, setPlayerState] = useState({
     currentSong: undefined,
+    index: 0,
     source: '',
-    isPlaying: false,
-    previouslyPlayed: []
+    state: playerStates.end,
+    previousState: playerStates.end,
+    volume: 0.20
   });
 
-  const initialPlay = () => {
-    const current = { ...playlist[0] };
-    setPlayerState({ ...playerState, currentSong: current });
+  const play = () => {
+    console.log('play');
+    if(playerState.source) {
+      console.log('already exists, resume');
+      audioRef.current.play();
+      return;
+    }
+
+    const next = playlist[playerState.index];
+    if(!next) {
+      console.log('no song in playlist, return');
+      setPlayerState({
+        ...playerState,
+        currentSong: undefined,
+        index: 0,
+        source: '',
+        state: playerStates.end
+      });
+      return;
+    }
+
+    const current = { ...next };
     musicApi.getSong(current.Path).then((songData) => {
       setPlayerState({
         ...playerState,
         currentSong: current,
         source: window.URL.createObjectURL(songData),
-        isPlaying: !playerState.isPlaying
       });
+      audioRef.current.volume = playerState.volume;
+      audioRef.current.load();
       audioRef.current.play();
     });
   };
 
-  const onClickPlayPause = () => {
-    if (playerState.isPlaying) {
-      audioRef.current.pause();
-      setPlayerState({ ...playerState, isPlaying: !playerState.isPlaying });
-    } else {
-      if(!playerState.currentSong || !playerState.source) {
-        initialPlay();
-      } else {
-        audioRef.current.play();
-        setPlayerState({ ...playerState, isPlaying: !playerState.isPlaying });
-      }
+  const pause = () => {
+    console.log('pause');
+    audioRef.current.pause();
+  };
+
+  const sk_bk = () => {
+    console.log('sk_bk');
+    const prev = playlist[playerState.index - 1];
+    if(!prev) {
+      console.log('no prev song');
+      setPlayerState({
+        ...playerState,
+        state: playerState.source ? playerStates.play : playerStates.end
+      });
+      return;
+    }
+
+    audioRef?.current?.pause();
+
+    setPlayerState({
+      ...playerState,
+      source: '',
+      index: playerState.index - 1,
+      state: playerStates.play,
+    });
+  };
+
+  const sk_fwd = () => {
+    console.log('sk_fwd');
+    const next = playlist[playerState.index + 1];
+    if(!next) {
+      console.log('no next song');
+      setPlayerState({
+        ...playerState,
+        state: playerState.source ? playerStates.play : playerStates.end
+      });
+      return;
+    }
+
+    audioRef?.current?.pause();
+
+    setPlayerState({
+      ...playerState,
+      source: '',
+      index: playerState.index + 1,
+      state: playerStates.play
+    });
+  };
+
+  const end = () => {
+    console.log('end');
+    if(playerState.source) {
+      setPlayerState({
+        ...playerState,
+        source: '',
+        index: playerState.index + 1,
+        state: playerStates.play
+      });
     }
   };
 
   const onChangeVolume = (value) => {
-    if(audioRef?.current?.volume)
+    if(audioRef?.current.volume) {
       audioRef.current.volume = (value*0.01);
-  };
-
-  const onSongEnd = () => {
-    const ended = playerState.currentSong;
-    setPlaylist(playlist.slice(1));
+    }
     setPlayerState({
       ...playerState,
-      currentSong: undefined,
-      source: '',
-      isPlaying: false,
-      previouslyPlayed: playerState.previouslyPlayed.push(ended)
+      volume: (value*0.01)
     });
-    onClickPlayPause();
   };
 
   const oldUI = () => {
     return (
       <Box>
         {playerState.source &&
-          <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={onSongEnd} />
+          <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={end} />
         }
         <Grid
           gap={2}
@@ -102,7 +166,7 @@ const Player = (props) => {
               />
               <IconButton
                 icon={playerState.isPlaying ? <MdPause /> : <MdPlayArrow />}
-                onClick={onClickPlayPause}
+                onClick={pause}
               />
               <IconButton
                 icon={<MdSkipNext />}
@@ -138,11 +202,30 @@ const Player = (props) => {
     );
   };
 
+  useEffect(() => {
+    console.log('updated player state:', playerState);
+
+    if(playerState.state === playerStates.end)
+      end();
+    if(playerState.state === playerStates.play)
+      play();
+    if(playerState.state === playerStates.pause)
+      pause();
+    if(playerState.state === playerStates.sk_bk)
+      sk_bk();
+    if(playerState.state === playerStates.sk_fwd)
+      sk_fwd();
+  }, [playerState.state]);
+
+  useEffect(() => {
+    console.log('playlist updated', playlist);
+  }, [playlist]);
+
   return (
     // todo: this might be a job for regular Grid after all, but instead you figure out how to use it
     <SimpleGrid columns={3} height='15%'>
       {playerState.source &&
-        <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={onSongEnd} />
+        <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={() => setPlayerState({ ...playerState, state: playerStates.end }) } />
       }
       {/* album box and details & main controls */}
       <Box>
@@ -170,17 +253,21 @@ const Player = (props) => {
               <IconButton
                 background='transparent'
                 icon={<MdSkipPrevious  />}
-                onClick={() => console.log('previous')}
+                onClick={() => setPlayerState({ ...playerState, state: playerStates.sk_bk })}
               />
               <IconButton
                 background='transparent'
-                icon={playerState.isPlaying ? <MdPauseCircleOutline /> : <MdPlayCircleOutline />}
-                onClick={onClickPlayPause}
+                icon={(playerState.state === playerStates.play) ? <MdPauseCircleOutline /> : <MdPlayCircleOutline />}
+                onClick={() => {
+                  const state = playerState.state;
+                  const newState = state === playerStates.play ? playerStates.pause : playerStates.play;
+                  setPlayerState({ ...playerState, state: newState });
+                }}
               />
               <IconButton
                 background='transparent'
                 icon={<MdSkipNext />}
-                onClick={() => console.log('next')}
+                onClick={() => setPlayerState({ ...playerState, state: playerStates.sk_fwd })}
               />
             </ButtonGroup>
           </Box>
@@ -199,6 +286,7 @@ const Player = (props) => {
             min={0}
             max={100}
             onChange={onChangeVolume}
+            value={parseInt(playerState.volume*100)}
             step={1}
             w='30%'
           >
@@ -211,7 +299,6 @@ const Player = (props) => {
             <IconButton
               background='transparent'
               icon={<MdList />}
-              onClick={() => console.log('previous')}
             />
           </ButtonGroup>
         </HStack>

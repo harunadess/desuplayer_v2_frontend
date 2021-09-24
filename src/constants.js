@@ -10,3 +10,11 @@ export const contextMenuOptions = {
   playNext: { text: 'Play Next', action: () => {} },
   addToQueue: { text: 'Add To Queue', action: () => {} }
 };
+
+export const playerStates = {
+  play: 'play',
+  pause: 'pause',
+  sk_fwd: 'sk_fwd',
+  sk_bk: 'sk_bk',
+  end: 'end'
+};
