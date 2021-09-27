@@ -5,6 +5,8 @@ export const constants = {
   serverOrigin: serverUrl
 };
 
+export const playlistContextMenuId = 'player_context_menu';
+
 export const contextMenuOptions = {
   play: { text: 'Play', action: () => {} },
   playNext: { text: 'Play Next', action: () => {} },

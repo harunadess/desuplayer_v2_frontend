@@ -1,57 +1,41 @@
-import React, { useState } from 'react';
-import { Box, Divider, List, ListItem, Text } from '@chakra-ui/layout';
-import { Popover, PopoverTrigger, PopoverContent, PopoverArrow, PopoverBody } from '@chakra-ui/popover';
+import React from 'react';
+import { Box, Divider, Portal, List, ListItem, Text } from '@chakra-ui/react';
+import { ContextMenu as CtxMenu, ContextMenuTrigger as CtxMenuTrigger, MenuItem as CtxMenuItem } from 'react-contextmenu';
 
-/* 
-  ContextMenu will have to be implemented differently..
-  By that, I mean that you will need to do it like an actual context menu and not around each item in ItemList
-  as that is way too resource intensive and makes everything real slow
-*/
+// need separate selected for context menu
 const ContextMenu = (props) => {
-  const {
-    children,
-    options,
-    itemData
-  } = props;
+  const { children, id, options, selected, setSelected } = props;
 
-  const [isOpen, setIsOpen] = useState(false);
-  const [isHover, setIsHover] = useState(new Array(Object.keys(options).length).fill(false));
-
-  const toggleIsHover = (idx) => {
-    setIsHover((isHover) => {
-      const newIsHover = [ ...isHover ];
-      newIsHover[idx] = !newIsHover[idx];
-      return newIsHover;
-    });
+  const onClickContextMenuItem = (e, option) => {
+    e.stopPropagation();
+    console.log('onClickContextMenuItem data -> ', selected);
+    options[option].action(selected);
   };
 
+  // todo: style with theme, maybe fix zIndex issue
   return (
-    <Popover closeOnBlur isLazy isOpen={isOpen} onClose={() => setIsOpen(false)}>
-        <PopoverTrigger>
-          <Box onAuxClick={() => setIsOpen(!isOpen)}>
-            {children}
-          </Box>
-        </PopoverTrigger>
-        <PopoverContent outlineColor='gray.300'>
-          <PopoverArrow outline='gray.400' />
-          <PopoverBody>
-            <List>
-              {Object.keys(options).map((option, idx) => {
-                return (
-                  <ListItem key={`${options[option].text}_${idx}`} onClick={() => options[option].action(itemData)} cursor='pointer'
-                    onMouseEnter={() => toggleIsHover(idx)} onMouseLeave={() => toggleIsHover(idx)}
-                    style={{ backgroundColor: isHover[idx] ? 'var(--chakra-colors-gray-50)' : 'inherit' }}
-                  >
-                    <Text>{options[option].text}</Text>
-                    <Divider />
+    <Box>
+      <CtxMenuTrigger id={id}>
+        {children}
+      </CtxMenuTrigger>
+      <Portal>
+        <CtxMenu id={id} style={{ zIndex: 9999 }}>
+          <List bg='white'>
+            {Object.keys(options).map((option, idx) => {
+              return (
+                <CtxMenuItem key={`${options[option].text}_${idx}`} onClick={(e) => onClickContextMenuItem(e, option)}>
+                  <ListItem bg='white' p='1'>
+                    <Text fontSize='small' cursor='pointer'>{options[option].text}</Text>
+                    <Divider marginTop='1' />
                   </ListItem>
-                );
-              })}
-            </List>
-          </PopoverBody>
-        </PopoverContent>
-    </Popover>
+                </CtxMenuItem>
+              );
+            })}
+          </List>
+        </CtxMenu>
+      </Portal>
+    </Box>
   );
 };
 
-export default React.memo(ContextMenu);
+export default ContextMenu;

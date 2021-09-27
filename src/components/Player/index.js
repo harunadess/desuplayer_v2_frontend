@@ -21,14 +21,6 @@ const layoutSizes = {
   auxControls: { h: maxHeight, w: 500 }
 };
 
-/*
-  Skip forward and back are being weird
-  It may be better to just have an index you use on playlist
-  This way if it's updated in some way, it shouldn't let the player's internal logic
-  get out of sync of the external playlist
-
-  TODO: keep event based model, but rewrite play/sk_fwd/sk_bk
-*/
 const Player = (props) => {
   const { playlist, setPlaylist } = props;
 

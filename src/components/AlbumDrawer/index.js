@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Drawer, DrawerBody, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerOverlay, DrawerFooter, SimpleGrid, Text } from '@chakra-ui/react';
 import ContextMenu from '../ContextMenu';
+import { playlistContextMenuId } from '../../constants';
 
 const gridWidths = {
   trackNum: '10%',
@@ -11,9 +12,11 @@ const gridWidths = {
 
 const AlbumDrawer = (props) => {
   const {
+    isOpen,
+    contextMenuOptions,
     selectedAlbum,
-    setSelectedAlbum,
-    contextMenuOptions
+    onClose,
+    setSelected
   } = props;
   const [songs, setSongs] = useState([]);
   
@@ -31,7 +34,7 @@ const AlbumDrawer = (props) => {
   // todo: potentially change out SimpleGrid/Text for something better
   // so you can adjust column widths
   return (
-    <Drawer isOpen={selectedAlbum?.Title !== undefined} placement='right' onClose={() => setSelectedAlbum({})} size='md'>
+    <Drawer isOpen={isOpen} placement='right' onClose={onClose} size='md'>
       <DrawerOverlay />
       <DrawerContent>
         <DrawerCloseButton />
@@ -45,7 +48,7 @@ const AlbumDrawer = (props) => {
           </SimpleGrid>
             {songs.map(song => {
               return (
-                <ContextMenu key={`ContextMenu_for_${song.Path}`} elementType={SimpleGrid} options={contextMenuOptions} itemData={song}>
+                <ContextMenu key={`ctx_menu_${song.Path}`} id={`${playlistContextMenuId}_${song.Path}`} options={contextMenuOptions} selected={song} setSelected={setSelected}>
                   <SimpleGrid columns={4} spacing={1} w='100%' marginTop={2} marginBottom={2}>
                     <Text cursor='pointer' size='md'>{song.Tracknumber}</Text>
                     <Text cursor='pointer' size='md'>{song.Title}</Text>

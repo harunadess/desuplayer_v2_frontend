@@ -3,6 +3,7 @@ import { FixedSizeGrid } from 'react-window';
 import { Box, Text } from '@chakra-ui/layout';
 import { Image } from '@chakra-ui/image';
 import ContextMenu from '../ContextMenu';
+import { playlistContextMenuId } from '../../constants';
 
 import propTypes from 'prop-types';
 
@@ -13,9 +14,10 @@ const ItemList = (props) => {
   const extraPad = 32;
 
   const {
+    contextMenuOptions,
     items,
     onClickItem,
-    contextMenuOptions,
+    selected,
     setSelected
   } = props;
 
@@ -61,7 +63,8 @@ const ItemList = (props) => {
   }, [items.length, window.innerWidth]);
 
   const onAuxClick = (item) => {
-    setSelected(item);
+    console.log('called on aux click', item);
+    // setSelected(item);
   };
 
   return (
@@ -83,20 +86,22 @@ const ItemList = (props) => {
           if (!item) return null;
           return (
             <Box key={`${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} padding='2' margin='4' w={boxSize} h={boxSize} cursor='pointer'
-              onClick={() => onClickItem(item)} style={style} onAuxClick={() => onAuxClick(item)}
+              onClick={() => { console.log('called onClick'); onClickItem(item) }} style={style} onAuxClick={() => onAuxClick(item)}
             >
-              {(item.Picturetype && item.Picturedata) &&
-                <Image margin='auto' src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} cursor='pointer' />
-              }
-              {(!item.Picturetype || !item.Picturedata) &&
-                <Box margin='auto' width={defaultSize} h={defaultSize} backgroundColor='gray.200' cursor='pointer'>
-                  <Text paddingTop={defaultTextOffset} align='center' fontWeight='bold'>No image available</Text>
-                </Box>
-              }
-              <Text fontSize='md' textAlign='center' textOverflow='ellipsis' overflow='hidden' cursor='pointer'>
-                {item.Title || 'No Title available'}<br />
-                {item.Artist || 'No Artist available'}
-              </Text>
+              <ContextMenu id={`${playlistContextMenuId}_${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} options={contextMenuOptions} selected={item}>
+                {(item.Picturetype && item.Picturedata) &&
+                  <Image margin='auto' src={`data:image/${item.Picturetype};base64,${item.Picturedata}`} cursor='pointer' />
+                }
+                {(!item.Picturetype || !item.Picturedata) &&
+                  <Box margin='auto' width={defaultSize} h={defaultSize} backgroundColor='gray.200' cursor='pointer'>
+                    <Text paddingTop={defaultTextOffset} align='center' fontWeight='bold'>No image available</Text>
+                  </Box>
+                }
+                <Text fontSize='md' textAlign='center' textOverflow='ellipsis' overflow='hidden' cursor='pointer'>
+                  {item.Title || 'No Title available'}<br />
+                  {item.Artist || 'No Artist available'}
+                </Text>
+              </ContextMenu>
             </Box>
           );
         }}

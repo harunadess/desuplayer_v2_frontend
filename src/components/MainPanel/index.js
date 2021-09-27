@@ -10,8 +10,6 @@ import { constants, contextMenuOptions } from '../../constants';
 import LibraryConfig from '../LibraryConfig';
 import AlbumDrawer from '../AlbumDrawer';
 
-// (maybe object of arrays with a key for each, and we know what tab we're on.. or something)
-
 // search
 // playlist
 // context menu
@@ -45,6 +43,7 @@ const MainPanel = () => {
 
   // display
   const [isLoading, setIsLoading] = useState(true);
+  const [isAlbumDrawerOpen, setAlbumDrawerOpen] = useState(false);
 
   useEffect(() => {
     requests.setApi(server);
@@ -79,20 +78,7 @@ const MainPanel = () => {
   const onClickAlbum = (item) => {
     console.log('clicked album ->', item);
     setSelected(item);
-  };
-
-  // todo: remove or rethink this
-  const onClickSong = (item) => {
-    console.log('clicked song =>', item);
-    setSelected(item);
-
-    requests.get('music/getSong', { path: item.Path }, 'blob')
-      .then(res => {
-        const format = res.headers['content-type'];
-        const track = new Blob([res.data], { type: format });
-        const trackURL = window.URL.createObjectURL(track);
-        setAudioSrc(trackURL);
-      }).catch(console.error);
+    setAlbumDrawerOpen(true);
   };
 
   const onChangeApi = (value) => {
@@ -100,28 +86,37 @@ const MainPanel = () => {
     requests.setApi(value);
   };
 
-  // todo: other playery things
-  const onPlay = (items) => {
-    if(Array.isArray(items))
-      setPlaylist(items);
+  const onPlay = (item) => {
+    console.log(item);
+    if(item.Songs)
+      setPlaylist(Object.values(item.Songs));
     else
-      setPlaylist([items]);
+      setPlaylist([item]);
+
+    setSelected({});
   };
 
-  // todo: other playery things
-  const onPlayNext = (items) => {
-    if(Array.isArray(items))
-      setPlaylist((playlist) => [].concat(...items, ...playlist));
+  const onPlayNext = (item) => {
+    console.log(item);
+    if(item.Songs)
+      setPlaylist((playlist) => [].concat(...Object.values(item.Songs), ...playlist));
     else
-      setPlaylist((playlist) => [].concat(items, ...playlist));
+      setPlaylist((playlist) => [].concat(item, ...playlist));
+    setSelected({});
   };
 
-  // todo: other playery things
-  const onAddToQueue = (items) => {
-    if(Array.isArray(items))
-     setPlaylist((playlist) => [].concat(...playlist, ...items));
+  const onAddToQueue = (item) => {
+    console.log(item);
+    if(item.Songs)
+      setPlaylist((playlist) => [].concat(...playlist, ...Object.values(item.Songs)));
     else
-      setPlaylist((playlist) => [].concat(...playlist, items));
+      setPlaylist((playlist) => [].concat(...playlist, item));
+    setSelected({});
+  };
+
+  const onAlbumDrawerClose = () => {
+    setSelected({});
+    setAlbumDrawerOpen(false);
   };
 
   // todo: loading skeleton
@@ -150,11 +145,11 @@ const MainPanel = () => {
       }
       {!isLoading && library.length > 0 &&
         <VStack align='stretch' divider={<StackDivider borderColor='gray.200' />} spacing='4' w='100vw' h='90vh' padding='4' overflow='hidden'>
-          <ItemList items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} setSelected={setSelected} />
+          <ItemList items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} selected={selected} setSelected={setSelected} />
           <Player playlist={playlist} setPlaylist={setPlaylist} />
         </VStack>
       }
-      <AlbumDrawer selectedAlbum={selected} setSelectedAlbum={setSelected} contextMenuOptions={contextMenu} />
+      <AlbumDrawer isOpen={isAlbumDrawerOpen} selectedAlbum={selected} onClose={onAlbumDrawerClose} contextMenuOptions={contextMenu} setSelected={setSelected} />
     </Box>
   );
 };
