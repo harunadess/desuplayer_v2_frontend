@@ -56,16 +56,20 @@ const Player = (props) => {
       return;
     }
 
-    const current = { ...next };
-    musicApi.getSong(current.Path).then((songData) => {
-      setPlayerState({
-        ...playerState,
-        currentSong: current,
-        source: window.URL.createObjectURL(songData),
+    let current = { ...next };
+    musicApi.getSongMeta(current.Path, current.AlbumArtist || current.Artist, current.AlbumTitle).then((songMeta) => {
+      current = songMeta;
+    }).finally(() => {
+      musicApi.getSong(current.Path).then((songData) => {
+        setPlayerState({
+          ...playerState,
+          currentSong: current,
+          source: window.URL.createObjectURL(songData),
+        });
+        audioRef.current.volume = playerState.volume;
+        audioRef.current.load();
+        audioRef.current.play();
       });
-      audioRef.current.volume = playerState.volume;
-      audioRef.current.load();
-      audioRef.current.play();
     });
   };
 
@@ -224,7 +228,7 @@ const Player = (props) => {
         <HStack spacing='4'>
           <Box key={`Player_${playerState.currentSong?.Title}_${playerState.currentSong?.Artist}`}>
             {(playerState.currentSong?.Picturetype && playerState.currentSong?.Picturedata) &&
-              <Image margin='auto' src={`data:image/${playerState.currentSong?.Picturetype};base64,${playerState.currentSong?.Picturedata}`} />
+              <Image margin='auto' h={maxHeight} src={`data:image/${playerState.currentSong?.Picturetype};base64,${playerState.currentSong?.Picturedata}`} />
             }
             {(!playerState.currentSong?.Picturetype || !playerState.currentSong?.Picturedata) &&
               <Box margin='auto' width={maxHeight} h={maxHeight} backgroundColor='gray.200' >

@@ -24,9 +24,9 @@ const ContextMenu = (props) => {
             {Object.keys(options).map((option, idx) => {
               return (
                 <CtxMenuItem key={`${options[option].text}_${idx}`} onClick={(e) => onClickContextMenuItem(e, option)}>
-                  <ListItem bg='white' p='1'>
+                  <ListItem bg='white' p='2' paddingRight='4'>
                     <Text fontSize='small' cursor='pointer'>{options[option].text}</Text>
-                    <Divider marginTop='1' />
+                    <Divider marginTop='0.5' p='0.5' paddingRight='4' />
                   </ListItem>
                 </CtxMenuItem>
               );

@@ -11,8 +11,11 @@ import LibraryConfig from '../LibraryConfig';
 import AlbumDrawer from '../AlbumDrawer';
 
 // search
+
 // playlist
-// context menu
+
+// context menu (needs tweaking, but sort of done)
+// fixing song meta data / adding meta data
 const MainPanel = () => {
   // api
   const [server, setServer] = useState(constants.serverOrigin);
@@ -22,24 +25,7 @@ const MainPanel = () => {
   const [musicDir, setMusicDir] = useState('D:/Users/Jorta/Music');
   const [selected, setSelected] = useState({});
   const [contextMenu, setContextMenu] = useState(contextMenuOptions);
-  const [playlist, setPlaylist] = useState([
-    {
-      "Title": "Red fraction (Game Version)",
-      "Artist": "Afterglow",
-      "Discnumber": 0,
-      "Tracknumber": 1,
-      "Filetype": "MP3",
-      "Path": "D:\\Users\\Jorta\\Music\\Bandori\\Red_fraction_Game_Version_.mp3"
-    },
-    {
-      "Title": "Scarlet Sky (Game Version)",
-      "Artist": "Afterglow",
-      "Discnumber": 0,
-      "Tracknumber": 1,
-      "Filetype": "MP3",
-      "Path": "D:\\Users\\Jorta\\Music\\Bandori\\Scarlet_Sky_Game_Version_.mp3"
-    }
-  ]);
+  const [playlist, setPlaylist] = useState([]);
 
   // display
   const [isLoading, setIsLoading] = useState(true);
@@ -87,31 +73,33 @@ const MainPanel = () => {
   };
 
   const onPlay = (item) => {
-    console.log(item);
-    if(item.Songs)
-      setPlaylist(Object.values(item.Songs));
-    else
+    // is a playlist or artist, therefore we don't want to hide the album drawer
+    if(item.Songs) {
+      const songs = Object.values(item.Songs);
+      setPlaylist(songs);
+    } else {
       setPlaylist([item]);
-
+    }
     setSelected({});
+    setAlbumDrawerOpen(false);
   };
 
   const onPlayNext = (item) => {
-    console.log(item);
-    if(item.Songs)
-      setPlaylist((playlist) => [].concat(...Object.values(item.Songs), ...playlist));
-    else
+    if(item.Songs) {
+      const songs = Object.values(item.Songs);
+      setPlaylist((playlist) => [].concat(...songs, ...playlist));
+    } else {
       setPlaylist((playlist) => [].concat(item, ...playlist));
-    setSelected({});
+    }
   };
 
   const onAddToQueue = (item) => {
-    console.log(item);
-    if(item.Songs)
-      setPlaylist((playlist) => [].concat(...playlist, ...Object.values(item.Songs)));
-    else
+    if(item.Songs) {
+      const songs = Object.values(item.Songs);
+      setPlaylist((playlist) => [].concat(...playlist, ...songs));
+    } else {
       setPlaylist((playlist) => [].concat(...playlist, item));
-    setSelected({});
+    }
   };
 
   const onAlbumDrawerClose = () => {

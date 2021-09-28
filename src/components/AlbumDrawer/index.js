@@ -26,7 +26,7 @@ const AlbumDrawer = (props) => {
 
     setSongs(() => {
       return Object.keys(selectedAlbum.Songs || {})
-              .map(k => ({...selectedAlbum.Songs[k], Artist: selectedAlbum.Artist}))
+              .map(k => selectedAlbum.Songs[k])
               .sort((a, b) => a.Tracknumber > b.Tracknumber ? 1 : -1);
     });
   }, [selectedAlbum]);

@@ -14,7 +14,14 @@ const getSong = async (path) => {
   return songData;
 };
 
+const getSongMeta = async (path, albumArtist, albumTitle) => {
+  console.log(path, albumArtist, albumTitle);
+  const response = await get(`${base}/getSongMeta`, { path: path, artist: albumArtist, album: albumTitle });
+  return response.data;
+};
+
 export default {
   getAllArtists,
-  getSong
+  getSong,
+  getSongMeta
 };
