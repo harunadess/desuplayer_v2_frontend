@@ -117,9 +117,9 @@ const MainPanel = () => {
         <Loader spinner />
       }
       {!isLoading && library.length === 0 &&
-        <Box>
-          <Center>
-            <Text align='center'>
+        <Box w='100vw' h='90wh'>
+          <Center w='100vw' h='90wh'>
+            <Text align='center' marginTop='15%'>
               Library failed to load, or is empty.<br />
               Check server is running at http://{server} and that your music root is correct.
             </Text>
