@@ -131,6 +131,13 @@ const Player = (props) => {
         index: playerState.index + 1,
         state: playerStates.play
       });
+    } else {
+      setPlayerState({
+        ...playerState,
+        source: '',
+        index: 0,
+        state: playerStates.end
+      });
     }
   };
 

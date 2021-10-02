@@ -9,6 +9,7 @@ import ItemList from '../ItemList';
 import { constants, contextMenuOptions } from '../../constants';
 import LibraryConfig from '../LibraryConfig';
 import AlbumDrawer from '../AlbumDrawer';
+import Loader from '../Loader';
 
 // search
 
@@ -113,13 +114,7 @@ const MainPanel = () => {
     <Box>
       <LibraryConfig buildLibrary={buildLibrary} getAlbums={musicApi.getAllArtists} onChangeApi={onChangeApi} musicDir={musicDir} setMusicDir={setMusicDir} server={server} />
       {isLoading &&
-        <Box>
-          <Center>
-            <Text align='center'>
-              Loading...
-            </Text>
-          </Center>
-        </Box>
+        <Loader spinner />
       }
       {!isLoading && library.length === 0 &&
         <Box>
