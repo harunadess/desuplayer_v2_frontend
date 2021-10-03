@@ -21,23 +21,22 @@ const ItemList = (props) => {
     setSelected
   } = props;
 
-  // todo: see if this can be refactored any
-  // it's kinda gross as is, but as long as it isn't abhorrently bad it's maybe fine:tm:
+  // todo: this is just genuinely wrong
+  // it is incorrect and needs to be fixed.
   const createLayout = (cols, rows, items) => {
     const grid = [];
     for(let x = 0; x < cols; x++) {
       grid.push([]);
-      for(let y = 0; y < rows; y++) {
-        grid.push([]);
-      }
     }
 
-    let x = 0, y = 0;
+    let x = 0;
     for(const it of items) {
-      grid[x++][y] = it;
+      if(it.Title === '')
+        console.log('it empty', it);
+      grid[x].push(it);
+      x++;
       if(x === cols) {
         x = 0;
-        y++;
       }
     }
     return grid;
@@ -58,9 +57,10 @@ const ItemList = (props) => {
     const data = createLayout(newLayout.cols, newLayout.rows, items)
     setLayout({
       ...newLayout,
-      data
+      data: data
     });
-  }, [items.length, window.innerWidth]);
+    console.log('data:', data);
+  }, [items.length, window.innerWidth, window.innerHeight]);
 
   const onAuxClick = (item) => {
     console.log('called on aux click', item);
@@ -82,6 +82,7 @@ const ItemList = (props) => {
         }}
       >
         {({ rowIndex, columnIndex, style }) => {
+          console.log(rowIndex, columnIndex);
           const item = layout.data[columnIndex][rowIndex];
           if (!item) return null;
           return (
