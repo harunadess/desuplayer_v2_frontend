@@ -24,7 +24,7 @@ const MainPanel = () => {
   const [library, setLibrary] = useState([]);
   const [musicDir, setMusicDir] = useState('D:/Users/Jorta/Music');
   const [selected, setSelected] = useState({});
-  const [contextMenu, setContextMenu] = useState(contextMenuOptions);
+  const [contextMenu, setContextMenu] = useState(() => contextMenuOptions);
   const [playlist, setPlaylist] = useState([]);
 
   // display

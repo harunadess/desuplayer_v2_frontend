@@ -26,14 +26,14 @@ const Player = (props) => {
 
   const audioRef = useRef(null);
 
-  const [playerState, setPlayerState] = useState({
+  const [playerState, setPlayerState] = useState(() => ({
     currentSong: undefined,
     index: 0,
     source: '',
     state: playerStates.end,
     previousState: playerStates.end,
     volume: 0.20
-  });
+  }));
 
   const play = () => {
     console.log('play');
@@ -142,60 +142,6 @@ const Player = (props) => {
       ...playerState,
       volume: (value*0.01)
     });
-  };
-
-  const oldUI = () => {
-    return (
-      <Box>
-        {playerState.source &&
-          <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={end} />
-        }
-        <Grid
-          gap={2}
-          templateColumns={'repeat(12, 1fr)'}
-        >
-          <GridItem colSpan={1}>
-            <ButtonGroup size={'sm'}>
-              <IconButton
-                icon={<MdSkipPrevious />}
-                onClick={() => console.log('previous')}
-              />
-              <IconButton
-                icon={playerState.isPlaying ? <MdPause /> : <MdPlayArrow />}
-                onClick={pause}
-              />
-              <IconButton
-                icon={<MdSkipNext />}
-                onClick={() => console.log('next')}
-              />
-            </ButtonGroup>
-          </GridItem>
-          <GridItem colSpan={2}>
-            <Center height={'100%'} width={'100%'}>
-              <Slider
-                min={0}
-                max={100}
-                onChange={onChangeVolume}
-                step={1}
-              >
-                <SliderTrack>
-                  <SliderFilledTrack />
-                </SliderTrack>
-              </Slider>
-            </Center>
-          </GridItem>
-          <GridItem colSpan={6}>
-            {playerState.currentlyPlaying?.Path &&
-              <Box>
-                <Text fontSize={'small'} >
-                  {playerState.currentlyPlaying.Title} - {playerState.currentlyPlaying.Artist ? `${playerState.currentlyPlaying.Artist}` : 'Unknown Artist'}{playerState.currentlyPlaying.Album ? ` (${playerState.currentlyPlaying.Album})` : ''}
-                </Text>
-              </Box>
-            }
-          </GridItem>
-        </Grid>
-      </Box>
-    );
   };
 
   useEffect(() => {
