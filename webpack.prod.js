@@ -1,13 +1,18 @@
-const path = require("path");
-const HtmlWebPackPlugin = require("html-webpack-plugin");
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
-
+const path = require('path');
+const HtmlWebPackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 module.exports = {
-  entry: "./src/index.js",
+  mode: 'production',
+  entry: {
+    main: './src/index.js'
+  },
   output: {
-    path: path.join(__dirname, "/dist"),
-    filename: "index_bundle.js"
+    filename: '[name].[contenthash].bundle.js',
+    chunkFilename: '[name].[contenthash].bundle.js',
+    path: path.join(__dirname, '/dist'),
+    publicPath: path.join(__dirname, '/dist')
   },
   module: {
     rules: [{
@@ -45,5 +50,11 @@ module.exports = {
       template: "./src/index.html" //source html
     }),
     new ExtractTextPlugin({ filename: 'css/style.css' })
-  ]
+  ],
+  optimization: {
+    minimize: true,
+    minimizer: [new TerserPlugin({
+      test: /\.js(\?.*)?$/i
+    })]
+  }
 }

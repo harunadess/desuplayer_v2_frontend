@@ -9,6 +9,7 @@ import ItemList from '../ItemList';
 import { constants, contextMenuOptions } from '../../constants';
 import LibraryConfig from '../LibraryConfig';
 import AlbumDrawer from '../AlbumDrawer';
+import Loader from '../Loader';
 
 // search
 
@@ -111,18 +112,12 @@ const MainPanel = () => {
     <Box>
       <LibraryConfig buildLibrary={buildLibrary} getAlbums={musicApi.getAllArtists} onChangeApi={onChangeApi} musicDir={musicDir} setMusicDir={setMusicDir} server={server} />
       {isLoading &&
-        <Box>
-          <Center>
-            <Text align='center'>
-              Loading...
-            </Text>
-          </Center>
-        </Box>
+        <Loader spinner />
       }
       {!isLoading && library.length === 0 &&
-        <Box>
-          <Center>
-            <Text align='center' whiteSpace='pre'>
+        <Box w='100vw' h='90wh'>
+          <Center w='100vw' h='90wh'>
+            <Text align='center' marginTop='15%'>
               Library failed to load, or is empty.<br />
               Check server is running at http://{server} and that your music root is correct.
             </Text>
