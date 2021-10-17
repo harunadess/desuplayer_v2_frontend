@@ -4,9 +4,7 @@ import propTypes from 'prop-types';
 import { IconButton } from '@chakra-ui/button';
 import { Box, HStack, SimpleGrid } from '@chakra-ui/layout';
 import { Slider, SliderTrack, SliderFilledTrack, SliderThumb } from '@chakra-ui/slider';
-import { MdFeaturedPlayList, MdGraphicEq, MdList, MdPause, MdPauseCircleOutline, MdPlayArrow, MdPlayCircleOutline, MdSkipNext, MdSkipPrevious } from 'react-icons/md'
-import { Grid, GridItem } from '@chakra-ui/layout';
-import { Center } from '@chakra-ui/layout';
+import { MdList, MdPauseCircleOutline, MdPlayCircleOutline, MdSkipNext, MdSkipPrevious } from 'react-icons/md'
 import { Text } from '@chakra-ui/layout';
 import { ButtonGroup } from '@chakra-ui/button';
 import { Image } from '@chakra-ui/image';
@@ -19,6 +17,12 @@ const layoutSizes = {
   mainControls: { h: maxHeight, w: 100 },
   albumAndDeets: { h: maxHeight, w: 100 },
   auxControls: { h: maxHeight, w: 500 }
+};
+
+const formatTime = (seconds) => {
+  const s = (seconds % 60);
+  const m = ((seconds - s) / 60) % 60;
+  return `${m < 10 ? `0${m.toFixed(0)}` : m.toFixed(0)}:${s < 10 ? `0${s.toFixed(0)}` : `${s.toFixed(0)}`}`;
 };
 
 const Player = (props) => {
@@ -34,6 +38,8 @@ const Player = (props) => {
     previousState: playerStates.end,
     volume: 0.20
   }));
+  const [currentTime, setCurrentTime] = useState(0);
+  const [maxTime, setMaxTime] = useState(0);
 
   const play = () => {
     console.log('play');
@@ -135,8 +141,8 @@ const Player = (props) => {
   };
 
   const onChangeVolume = (value) => {
-    if(audioRef?.current.volume) {
-      audioRef.current.volume = (value*0.01);
+    if(audioRef?.current?.volume !== undefined) {
+      audioRef.current.volume = (value * 0.01);
     }
     setPlayerState({
       ...playerState,
@@ -163,6 +169,23 @@ const Player = (props) => {
     console.log('playlist updated', playlist);
   }, [playlist]);
 
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(Math.floor(audioRef.current.currentTime));
+      setMaxTime(Math.floor(audioRef.current.duration));
+    };
+
+    if(playerState.source && audioRef.current) {
+      audioRef.current.addEventListener('timeupdate', updateTime);
+    }
+
+    return () => {
+      if (playerState.source && audioRef.current) {
+        audioRef.current.removeEventListener('timeupdate', updateTime);
+      }
+    }
+  }, [playerState.source]);
+
   return (
     // todo: this might be a job for regular Grid after all, but instead you figure out how to use it
     <SimpleGrid columns={3} height='15%'>
@@ -183,10 +206,8 @@ const Player = (props) => {
             }
           </Box>
           <Box w='35%'>
-            <Text fontSize='sm' textAlign='left' textOverflow='ellipsis' overflow='hidden'>
-              {playerState.currentSong?.Title || 'No Title available'}
-            </Text>
-            <Text fontSize='sm' textAlign='left' textOverflow='ellipsis' overflow='hidden'>
+            <Text fontSize='sm' textAlign='left' textOverflow='ellipsis' overflow='hidden' whiteSpace='pre'>
+              {`${playerState.currentSong?.Title || 'No Title available'}\n`}
               {playerState.currentSong?.Artist || 'No Artist available'}
             </Text>
           </Box>
@@ -218,7 +239,14 @@ const Player = (props) => {
       <Box>
         {/* track seek or whatever maybe? */}
         <Box>
-          Box2
+          <HStack marginTop='4vh'>
+            <Text fontSize='sm' w='20%'>{formatTime(currentTime)} / {formatTime(maxTime)}</Text>
+            <Slider min={0} max={maxTime} value={currentTime}>
+              <SliderTrack>
+                <SliderFilledTrack />
+              </SliderTrack>
+            </Slider>
+          </HStack>
         </Box>
       </Box>
       {/* todo: revise this styling. additional things, perhaps */}

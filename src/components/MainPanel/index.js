@@ -107,8 +107,6 @@ const MainPanel = () => {
     setAlbumDrawerOpen(false);
   };
 
-  // todo: loading skeleton
-  // todo: change album menu to only open on single click (separate state, not just check if selected album)
   return (
     <Box>
       <LibraryConfig buildLibrary={buildLibrary} getAlbums={musicApi.getAllArtists} onChangeApi={onChangeApi} musicDir={musicDir} setMusicDir={setMusicDir} server={server} />
@@ -124,7 +122,7 @@ const MainPanel = () => {
       {!isLoading && library.length === 0 &&
         <Box>
           <Center>
-            <Text align='center'>
+            <Text align='center' whiteSpace='pre'>
               Library failed to load, or is empty.<br />
               Check server is running at http://{server} and that your music root is correct.
             </Text>

@@ -93,7 +93,7 @@ const ItemList = (props) => {
                   <Text paddingTop={defaultTextOffset} align='center' fontWeight='bold'>No image available</Text>
                 </Box>
               }
-              <Text fontSize='md' textAlign='center' textOverflow='ellipsis' overflow='hidden' cursor='pointer' isTruncated whiteSpace="pre">
+              <Text fontSize='md' textAlign='center' textOverflow='ellipsis' overflow='hidden' cursor='pointer' isTruncated whiteSpace='pre'>
                 {`${item.Title || 'No Title available'}\n`}
                 {item.Artist || 'No Artist available'}
               </Text>
