@@ -1,53 +1,55 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, {FC, useCallback, useEffect, useState} from 'react';
 import { FixedSizeGrid } from 'react-window';
 import { Box, Text } from '@chakra-ui/layout';
 import { Image } from '@chakra-ui/image';
 import ContextMenu from '../ContextMenu';
-import { playlistContextMenuId } from '../../constants';
-
-import propTypes from 'prop-types';
+import {ContextMenuOptions, playlistContextMenuId} from '../../constants';
+import {Album} from '../../types/data/library';
 
 const gridStyle = { marginLeft: '3%' };
 
-const ItemList = (props) => {
+const createLayout = (cols: number, rows: number, items: Album[]) => {
+  const grid = [] as Album[][];
+  for(let x = 0; x < cols; x++) {
+    grid.push([]);
+  }
+
+  let x = 0;
+  for(const it of items) {
+    grid[x].push(it);
+    x++;
+    if(x === cols) {
+      x = 0;
+    }
+  }
+  return grid;
+};
+
+interface Props {
+  contextMenuOptions: ContextMenuOptions;
+  items: Album[];
+  onClickItem: (item: Album) => void;
+  selected: Album | {};
+  setSelected: (selected: Album | {} | ((prevState: Album | {}) => void)) => void;
+}
+
+interface GridLayout {
+  cols: number;
+  rows: number;
+  data: Album[][];
+}
+
+const ItemList: FC<Props> = (props) => {
   const boxSize = 250;
   const defaultSize = 200;
   const defaultTextOffset = 84;
+
   const extraPad = 32;
 
-  const {
-    contextMenuOptions,
-    items,
-    onClickItem,
-  } = props;
+  const {contextMenuOptions, items, onClickItem} = props;
 
-  // todo: this is just genuinely wrong
-  // it is incorrect and needs to be fixed.
-  const createLayout = (cols, rows, items) => {
-    const grid = [];
-    for(let x = 0; x < cols; x++) {
-      grid.push([]);
-    }
+  const [layout, setLayout] = useState<GridLayout>(() => ({cols: 1, rows: 1, data: [[]]}));
 
-    let x = 0;
-    for(const it of items) {
-      if(it.Title === '')
-        console.log('it empty', it);
-      grid[x].push(it);
-      x++;
-      if(x === cols) {
-        x = 0;
-      }
-    }
-    return grid;
-  };
-
-  const [layout, setLayout] = useState(() => ({
-    cols: 1,
-    rows: 1,
-    data: [ [ { } ] ]
-  }));
-  
   useEffect(() => {
     const cols = window.innerWidth / boxSize;
     const newLayout = {
@@ -62,7 +64,7 @@ const ItemList = (props) => {
     console.log('data:', data);
   }, [items.length, window.innerWidth, window.innerHeight]);
 
-  const onClickGridItem = useCallback((item) => {
+  const onClickGridItem = useCallback((item: Album) => {
     onClickItem(item);
   }, [items]);
 
@@ -74,6 +76,7 @@ const ItemList = (props) => {
       rowHeight={boxSize + extraPad}
       width={window.innerWidth || 0}
       height={window.innerHeight || 0}
+      // @ts-ignore todo: come back and see if you can resolve
       itemCount={items.length}
       style={gridStyle}
     >
@@ -103,11 +106,6 @@ const ItemList = (props) => {
       }}
     </FixedSizeGrid>
   );
-};
-
-ItemList.propTypes = {
-  items: propTypes.arrayOf(propTypes.object).isRequired,
-  onClickItem: propTypes.func
 };
 
 export default React.memo(ItemList, (prevProps, nextProps) => {
