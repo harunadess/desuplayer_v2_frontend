@@ -10,6 +10,5 @@ const build = async (dir: string) => {
   return response.data;
 };
 
-export default {
-  build
-};
+const endpoints = { build };
+export default endpoints;

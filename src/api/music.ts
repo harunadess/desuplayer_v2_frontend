@@ -33,8 +33,5 @@ const getSongMeta = async (path: string, albumArtist: string, albumTitle: string
   return response.data;
 };
 
-export default {
-  getAllArtists,
-  getSong,
-  getSongMeta
-};
+const endpoints = { getAllArtists, getSong, getSongMeta };
+export default endpoints;

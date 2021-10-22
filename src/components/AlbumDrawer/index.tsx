@@ -1,35 +1,36 @@
-import React, { useEffect, useState } from 'react';
+import { FC, useEffect, useState } from 'react';
 import { Drawer, DrawerBody, DrawerContent, DrawerCloseButton, DrawerHeader, DrawerOverlay, DrawerFooter, SimpleGrid, Text } from '@chakra-ui/react';
 import ContextMenu from '../ContextMenu';
-import { playlistContextMenuId } from '../../constants';
+import { ContextMenuOptions, playlistContextMenuId } from '../../constants';
+import { Album, Playable, Song } from '../../types/data/library';
 
-const gridWidths = {
-  trackNum: '10%',
-  title: '30%',
-  artist: '30%',
-  format: '30%'
-};
+interface Props {
+  contextMenuOptions: ContextMenuOptions;
+  isOpen: boolean;
+  selectedAlbum: Album | {};
+  setSelected: (item: Playable) => void;
+  onClose: () => void;
+}
 
-const AlbumDrawer = (props) => {
-  const {
-    isOpen,
-    contextMenuOptions,
-    selectedAlbum,
-    onClose,
-    setSelected
-  } = props;
-  const [songs, setSongs] = useState([]);
+const albumSelected = (item: Album | {}): item is Album => (item as Album).Songs !== undefined;
+
+const AlbumDrawer: FC<Props> = (props) => {
+  const { contextMenuOptions, isOpen, selectedAlbum, setSelected, onClose } = props;
+
+  const [songs, setSongs] = useState<Song[]>([]);
   
-
   useEffect(() => {
-    if(!selectedAlbum) return;
-
-    setSongs(() => {
-      return Object.keys(selectedAlbum.Songs || {})
-              .map(k => selectedAlbum.Songs[k])
-              .sort((a, b) => a.Tracknumber > b.Tracknumber ? 1 : -1);
-    });
+    console.log('selectedAlbum updated', contextMenuOptions.addToQueue.action.toString());
+    if(albumSelected(selectedAlbum)) {
+      const sortedSongs = Object.keys(selectedAlbum.Songs)
+      .map(k => selectedAlbum.Songs[k])
+      .sort((a, b) => a.Tracknumber > b.Tracknumber ? 1 : -1);
+      setSongs(sortedSongs);
+    }
   }, [selectedAlbum]);
+  
+  if(!albumSelected(selectedAlbum))
+    return null;
 
   // todo: potentially change out SimpleGrid/Text for something better
   // so you can adjust column widths
@@ -43,12 +44,12 @@ const AlbumDrawer = (props) => {
           <SimpleGrid columns={4} spacing={1} w='100%'>
             <Text size='md'>No.</Text>
             <Text size='md'>Title</Text>
-            <Text size='md'>Atrist</Text>
+            <Text size='md'>Artist</Text>
             <Text size='md'>Format</Text>
           </SimpleGrid>
             {songs.map(song => {
               return (
-                <ContextMenu key={`ctx_menu_${song.Path}`} id={`${playlistContextMenuId}_${song.Path}`} options={contextMenuOptions} selected={song} setSelected={setSelected}>
+                <ContextMenu key={`ctx_menu_${song.Path}`} id={`${playlistContextMenuId}_${song.Path}`} options={contextMenuOptions} selected={song}>
                   <SimpleGrid columns={4} spacing={1} w='100%' marginTop={2} marginBottom={2}>
                     <Text cursor='pointer' size='md'>{song.Tracknumber}</Text>
                     <Text cursor='pointer' size='md'>{song.Title}</Text>

@@ -1,7 +1,11 @@
-import React from 'react';
+import { FC } from 'react';
 import { ContextMenuTrigger as CtxMenuTrigger } from 'react-contextmenu';
 
-const ContextMenuTrigger = (props) => {
+interface Props {
+  id: string;
+}
+
+const ContextMenuTrigger: FC<Props> = (props) => {
   const { children, id } = props;
 
   return (

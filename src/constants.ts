@@ -19,10 +19,10 @@ export type ContextMenuOptions = {
   [k in keyof typeof contextMenuOptions]: typeof contextMenuOptions[k];
 }
 
-export const playerStates = {
-  play: 'play',
-  pause: 'pause',
-  sk_fwd: 'sk_fwd',
-  sk_bk: 'sk_bk',
-  end: 'end'
+export enum playerStates {
+  play = 'play',
+  pause ='pause',
+  sk_fwd ='sk_fwd',
+  sk_bk ='sk_bk',
+  end = 'end'
 };

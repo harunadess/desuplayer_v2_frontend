@@ -1,18 +1,16 @@
-import React, {FC, useCallback, useEffect, useState} from 'react';
+import React, { FC, useCallback, useEffect, useState } from 'react';
 import { FixedSizeGrid } from 'react-window';
 import { Box, Text } from '@chakra-ui/layout';
 import { Image } from '@chakra-ui/image';
 import ContextMenu from '../ContextMenu';
-import {ContextMenuOptions, playlistContextMenuId} from '../../constants';
-import {Album} from '../../types/data/library';
+import { ContextMenuOptions, playlistContextMenuId } from '../../constants';
+import { Album } from '../../types/data/library';
 
 const gridStyle = { marginLeft: '3%' };
 
 const createLayout = (cols: number, rows: number, items: Album[]) => {
   const grid = [] as Album[][];
-  for(let x = 0; x < cols; x++) {
-    grid.push([]);
-  }
+  for(let x = 0; x < cols; x++) grid.push([]);
 
   let x = 0;
   for(const it of items) {
@@ -46,9 +44,8 @@ const ItemList: FC<Props> = (props) => {
 
   const extraPad = 32;
 
-  const {contextMenuOptions, items, onClickItem} = props;
-
-  const [layout, setLayout] = useState<GridLayout>(() => ({cols: 1, rows: 1, data: [[]]}));
+  const { contextMenuOptions, items, onClickItem } = props;
+  const [layout, setLayout] = useState<GridLayout>(() => ({ cols: 1, rows: 1, data: [[]] }));
 
   useEffect(() => {
     const cols = window.innerWidth / boxSize;
@@ -76,8 +73,8 @@ const ItemList: FC<Props> = (props) => {
       rowHeight={boxSize + extraPad}
       width={window.innerWidth || 0}
       height={window.innerHeight || 0}
-      // @ts-ignore todo: come back and see if you can resolve
-      itemCount={items.length}
+      // todo: come back and see if you can resolve
+      // itemCount={items.length}
       style={gridStyle}
     >
       {({ rowIndex, columnIndex, style }) => {

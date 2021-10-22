@@ -1,6 +1,4 @@
-export interface GetAllArtistsParams {
-
-}
+export interface GetAllArtistsParams {}
 
 export interface GetSongParams {
   path: string;

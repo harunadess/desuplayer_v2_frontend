@@ -16,7 +16,7 @@ export interface Album {
   Genre: string;
   Picturedata: string;
   Picturetype: string;
-  Songs: Map<string, Song>;
+  Songs: { [path: string]: Song };
   AlbumKey: string;
 }
 
@@ -32,3 +32,7 @@ export interface Artist {
 }
 
 export type Playable = Song | Album;
+
+export const isAlbum = (item: Playable): item is Album => {
+  return (item as Album).Songs !== undefined;
+};

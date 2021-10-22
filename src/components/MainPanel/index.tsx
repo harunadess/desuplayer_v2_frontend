@@ -1,16 +1,16 @@
-import {useState, useEffect, FC} from 'react';
-import {StackDivider, VStack, Box} from '@chakra-ui/layout';
-import {Center, Text} from '@chakra-ui/react';
+import { useState, useEffect, FC } from 'react';
+import { StackDivider, VStack, Box } from '@chakra-ui/layout';
+import { Center, Text } from '@chakra-ui/react';
 import * as requests from '../../helpers/request';
-import {default as libraryApi} from '../../api/library';
-import {default as musicApi} from '../../api/music';
+import { default as libraryApi } from '../../api/library';
+import { default as musicApi } from '../../api/music';
 import Player from '../Player';
 import ItemList from '../ItemList';
-import {constants, contextMenuOptions} from '../../constants';
+import { constants, contextMenuOptions } from '../../constants';
 import LibraryConfig from '../LibraryConfig';
 import AlbumDrawer from '../AlbumDrawer';
 import Loader from '../Loader';
-import {Album, Song, Playable} from '../../types/data/library';
+import { Album, Song, Playable, isAlbum } from '../../types/data/library';
 
 // search
 
@@ -48,9 +48,9 @@ const MainPanel: FC = () => {
 
     setContextMenu((contextMenu) => {
       return {
-        play: {...contextMenu.play, action: onPlay},
-        playNext: {...contextMenu.playNext, action: onPlayNext},
-        addToQueue: {...contextMenu.addToQueue, action: onAddToQueue}
+        play: { ...contextMenu.play, action: onPlay },
+        playNext: { ...contextMenu.playNext, action: onPlayNext },
+        addToQueue: { ...contextMenu.addToQueue, action: onAddToQueue }
       };
     });
   }, []);
@@ -77,10 +77,6 @@ const MainPanel: FC = () => {
     setServer(value);
     requests.setApi(value);
   };
-
-  const isAlbum = (item: Playable): item is Album => {
-    return (item as Album).Songs !== undefined;
-  }
 
   const onPlay = (item: Playable) => {
     if (isAlbum(item)) {
@@ -119,30 +115,30 @@ const MainPanel: FC = () => {
   return (
     <Box>
       <LibraryConfig buildLibrary={buildLibrary} getAllArtists={musicApi.getAllArtists} onChangeApi={onChangeApi}
-                     musicDir={musicDir} setMusicDir={setMusicDir} server={server}/>
+        musicDir={musicDir} setMusicDir={setMusicDir} server={server} />
       {isLoading &&
-        <Loader spinner/>
+        <Loader spinner />
       }
       {!isLoading && library.length === 0 &&
-      <Box w="100vw" h="90wh">
+        <Box w="100vw" h="90wh">
           <Center w="100vw" h="90wh">
-              <Text align="center" marginTop="15%">
-                  Library failed to load, or is empty.<br/>
-                  Check server is running at http://{server} and that your music root is correct.
-              </Text>
+            <Text align="center" marginTop="15%">
+              Library failed to load, or is empty.<br />
+              Check server is running at http://{server} and that your music root is correct.
+            </Text>
           </Center>
-      </Box>
+        </Box>
       }
       {!isLoading && library.length > 0 &&
-      <VStack align="stretch" divider={<StackDivider borderColor="gray.200"/>} spacing="4" w="100vw" h="90vh"
-              padding="4" overflow="hidden">
+        <VStack align="stretch" divider={<StackDivider borderColor="gray.200" />} spacing="4" w="100vw" h="90vh"
+          padding="4" overflow="hidden">
           <ItemList items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} selected={selected}
-                    setSelected={setSelected}/>
-          <Player playlist={playlist} setPlaylist={setPlaylist}/>
-      </VStack>
+            setSelected={setSelected} />
+          <Player playlist={playlist} setPlaylist={setPlaylist} />
+        </VStack>
       }
-      <AlbumDrawer isOpen={isAlbumDrawerOpen} selectedAlbum={selected} onClose={onAlbumDrawerClose}
-                   contextMenuOptions={contextMenu} setSelected={setSelected}/>
+      <AlbumDrawer contextMenuOptions={contextMenu} isOpen={isAlbumDrawerOpen} selectedAlbum={selected} onClose={onAlbumDrawerClose}
+        setSelected={setSelected} />
     </Box>
   );
 };
