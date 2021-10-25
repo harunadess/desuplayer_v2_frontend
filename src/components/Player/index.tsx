@@ -11,6 +11,7 @@ import { playerStates } from '../../constants';
 import { Song, SongMeta } from '../../types/data/library';
 import PlayerCurrentlyPlaying from '../PlayerCurrentlyPlaying';
 import PlayerTrackInfo from '../PlayerTrackInfo';
+import PlayerAdditionalControls from '../PlayerAdditionalControls';
 
 const maxHeight = 100;
 // const layoutSizes = {
@@ -166,7 +167,7 @@ const Player: FC<Props> = (props) => {
     }
   };
 
-  const onChangeVolume = (value: number) => {
+const onChangeVolume = (value: number) => {
     if(audioRef.current) {
       audioRef.current.volume = (value * 0.01);
     }
@@ -226,31 +227,9 @@ const Player: FC<Props> = (props) => {
         {/* album box and details & main controls */}
         <PlayerCurrentlyPlaying playerState={playerState} setPlayerState={setPlayerState} maxHeight={maxHeight} />
         <PlayerTrackInfo currentTime={currentTime} maxTime={maxTime} />
+        <PlayerAdditionalControls volume={playerState.volume} onChangeVolume={onChangeVolume} />
         {/* todo: revise this styling. additional things, perhaps */}
-        <Box position='fixed' left='calc(100vw - 12%)' top='calc(100vh - 10%)' w='20%'>
-          <HStack>
-            <Slider
-              min={0}
-              max={100}
-              onChange={onChangeVolume}
-              value={Math.floor(playerState.volume*100)}
-              step={1}
-              w='30%'
-            >
-              <SliderTrack>
-                <SliderFilledTrack />
-              </SliderTrack>
-              <SliderThumb />
-            </Slider>
-            <ButtonGroup size='lg'>
-              <IconButton
-                aria-label='Playlist'
-                background='transparent'
-                icon={<MdList />}
-              />
-            </ButtonGroup>
-          </HStack>
-        </Box>
+        
       </SimpleGrid>
     </>
   );
