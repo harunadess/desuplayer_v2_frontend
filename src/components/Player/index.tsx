@@ -2,14 +2,15 @@ import { useEffect, useState, useRef, FC } from 'react';
 import { IconButton } from '@chakra-ui/button';
 import { Box, HStack, SimpleGrid } from '@chakra-ui/layout';
 import { Slider, SliderTrack, SliderFilledTrack, SliderThumb } from '@chakra-ui/slider';
-import { MdList, MdPauseCircleOutline, MdPlayCircleOutline, MdSkipNext, MdSkipPrevious } from 'react-icons/md'
+import { MdList } from 'react-icons/md'
 import { Text } from '@chakra-ui/layout';
 import { ButtonGroup } from '@chakra-ui/button';
-import { Image } from '@chakra-ui/image';
 
 import { default as musicApi } from '../../api/music';
 import { playerStates } from '../../constants';
 import { Song, SongMeta } from '../../types/data/library';
+import PlayerCurrentlyPlaying from '../PlayerCurrentlyPlaying';
+import PlayerTrackInfo from '../PlayerTrackInfo';
 
 const maxHeight = 100;
 // const layoutSizes = {
@@ -18,13 +19,8 @@ const maxHeight = 100;
 //   auxControls: { h: maxHeight, w: 500 }
 // };
 
-const formatTime = (seconds: number): string => {
-  const s = (seconds % 60);
-  const m = ((seconds - s) / 60) % 60;
-  return `${m < 10 ? `0${m.toFixed(0)}` : m.toFixed(0)}:${s < 10 ? `0${s.toFixed(0)}` : `${s.toFixed(0)}`}`;
-};
 
-interface PlayerState {
+export interface PlayerState {
   currentSong?: SongMeta;
   index: number;
   source: string;
@@ -200,20 +196,22 @@ const Player: FC<Props> = (props) => {
   }, [playlist]);
 
   useEffect(() => {
+    const audioElem = audioRef.current;
+
     const updateTime = () => {
-      if(audioRef.current) {
-        setCurrentTime(Math.floor(audioRef.current.currentTime));
-        setMaxTime(Math.floor(audioRef.current.duration));
+      if(audioElem) {
+        setCurrentTime(Math.floor(audioElem.currentTime));
+        setMaxTime(Math.floor(audioElem.duration));
       }
     };
 
-    if(playerState.source && audioRef.current) {
-      audioRef.current.addEventListener('timeupdate', updateTime);
+    if(playerState.source && audioElem) {
+      audioElem.addEventListener('timeupdate', updateTime);
     }
 
     return () => {
-      if (playerState.source && audioRef.current) {
-        audioRef.current.removeEventListener('timeupdate', updateTime);
+      if (playerState.source && audioElem) {
+        audioElem.removeEventListener('timeupdate', updateTime);
       }
     }
   }, [playerState.source]);
@@ -226,65 +224,8 @@ const Player: FC<Props> = (props) => {
       }
       <SimpleGrid columns={3} height='15%'>
         {/* album box and details & main controls */}
-        <Box>
-          <HStack spacing='4'>
-            <Box key={`Player_${playerState.currentSong?.Title}_${playerState.currentSong?.Artist}`}>
-              {(playerState.currentSong?.Picturetype && playerState.currentSong?.Picturedata) &&
-                <Image margin='auto' h={maxHeight} src={`data:image/${playerState.currentSong?.Picturetype};base64,${playerState.currentSong?.Picturedata}`} />
-              }
-              {(!playerState.currentSong?.Picturetype || !playerState.currentSong?.Picturedata) &&
-                <Box margin='auto' width={maxHeight} h={maxHeight} backgroundColor='gray.200' >
-                  <Text paddingTop='25%' align='center' fontWeight='bold'>No image available</Text>
-                </Box>
-              }
-            </Box>
-            <Box w='35%'>
-              <Text fontSize='sm' textAlign='left' textOverflow='ellipsis' overflow='hidden' whiteSpace='pre'>
-                {`${playerState.currentSong?.Title || 'No Title available'}\n`}
-                {playerState.currentSong?.Artist || 'No Artist available'}
-              </Text>
-            </Box>
-            <Box>
-              <ButtonGroup size='lg'>
-                <IconButton
-                  aria-label='Previous'
-                  background='transparent'
-                  icon={<MdSkipPrevious  />}
-                  onClick={() => setPlayerState({ ...playerState, state: playerStates.sk_bk })}
-                />
-                <IconButton
-                  aria-label='Play/Pause'
-                  background='transparent'
-                  icon={(playerState.state === playerStates.play) ? <MdPauseCircleOutline /> : <MdPlayCircleOutline />}
-                  onClick={() => {
-                    const state = playerState.state;
-                    const newState = state === playerStates.play ? playerStates.pause : playerStates.play;
-                    setPlayerState({ ...playerState, state: newState });
-                  }}
-                />
-                <IconButton
-                  aria-label='Next'
-                  background='transparent'
-                  icon={<MdSkipNext />}
-                  onClick={() => setPlayerState({ ...playerState, state: playerStates.sk_fwd })}
-                />
-              </ButtonGroup>
-            </Box>
-          </HStack>
-        </Box>
-        <Box>
-          {/* track seek or whatever maybe? */}
-          <Box>
-            <HStack marginTop='4vh'>
-              <Text fontSize='sm' w='20%'>{formatTime(currentTime)} / {formatTime(maxTime)}</Text>
-              <Slider min={0} max={maxTime} value={currentTime}>
-                <SliderTrack>
-                  <SliderFilledTrack />
-                </SliderTrack>
-              </Slider>
-            </HStack>
-          </Box>
-        </Box>
+        <PlayerCurrentlyPlaying playerState={playerState} setPlayerState={setPlayerState} maxHeight={maxHeight} />
+        <PlayerTrackInfo currentTime={currentTime} maxTime={maxTime} />
         {/* todo: revise this styling. additional things, perhaps */}
         <Box position='fixed' left='calc(100vw - 12%)' top='calc(100vh - 10%)' w='20%'>
           <HStack>
