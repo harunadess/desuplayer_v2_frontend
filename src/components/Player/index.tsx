@@ -1,10 +1,5 @@
 import { useEffect, useState, useRef, FC } from 'react';
-import { IconButton } from '@chakra-ui/button';
-import { Box, HStack, SimpleGrid } from '@chakra-ui/layout';
-import { Slider, SliderTrack, SliderFilledTrack, SliderThumb } from '@chakra-ui/slider';
-import { MdList } from 'react-icons/md'
-import { Text } from '@chakra-ui/layout';
-import { ButtonGroup } from '@chakra-ui/button';
+import { SimpleGrid } from '@chakra-ui/layout';
 
 import { default as musicApi } from '../../api/music';
 import { playerStates } from '../../constants';
@@ -33,10 +28,12 @@ export interface PlayerState {
 interface Props {
   playlist: Song[],
   setPlaylist: (_: Song[] | ((prevState: Song[]) => Song[])) => void;
+  shouldStartPlaying: boolean;
+  setShouldStartPlaying: (_: boolean | ((prevState: boolean) => boolean)) => void;
 }
 
 const Player: FC<Props> = (props) => {
-  const { playlist, setPlaylist } = props;
+  const { playlist, setPlaylist, shouldStartPlaying, setShouldStartPlaying } = props;
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -51,9 +48,9 @@ const Player: FC<Props> = (props) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [maxTime, setMaxTime] = useState(0);
 
-  const play = () => {
+  const play = (forcePlay: boolean = false) => {
     console.log('play');
-    if(playerState.source) {
+    if(!forcePlay && playerState.source) {
       console.log('already exists, resume');
       if(audioRef.current) {
         audioRef.current.play();
@@ -81,6 +78,7 @@ const Player: FC<Props> = (props) => {
       musicApi.getSong(current.Path).then((songData) => {
         setPlayerState({
           ...playerState,
+          state: playerStates.play,
           currentSong: current,
           source: window.URL.createObjectURL(songData),
         });
@@ -151,12 +149,23 @@ const Player: FC<Props> = (props) => {
   const end = () => {
     console.log('end');
     if(playerState.source) {
-      setPlayerState({
-        ...playerState,
-        source: '',
-        index: playerState.index + 1,
-        state: playerStates.play
-      });
+      if(playerState.index + 1 >= playlist.length) {
+        setPlaylist([]);
+        setPlayerState({
+          ...playerState,
+          currentSong: undefined,
+          source: '',
+          index: 0,
+          state: playerStates.end
+        })
+      } else {
+        setPlayerState({
+          ...playerState,
+          source: '',
+          index: playerState.index + 1,
+          state: playerStates.play
+        });
+      }
     } else {
       setPlayerState({
         ...playerState,
@@ -169,7 +178,7 @@ const Player: FC<Props> = (props) => {
 
 const onChangeVolume = (value: number) => {
     if(audioRef.current) {
-      audioRef.current.volume = (value * 0.01);
+      audioRef.current.volume = (value*0.01);
     }
     setPlayerState({
       ...playerState,
@@ -177,24 +186,26 @@ const onChangeVolume = (value: number) => {
     });
   };
 
+   useEffect(() => {
+    console.log('playlist updated', playlist);
+  }, [playlist]);
+
   useEffect(() => {
     console.log('updated player state:', playerState);
 
     if(playerState.state === playerStates.end)
       end();
     if(playerState.state === playerStates.play)
-      play();
+      play(shouldStartPlaying);
     if(playerState.state === playerStates.pause)
       pause();
     if(playerState.state === playerStates.sk_bk)
       sk_bk();
     if(playerState.state === playerStates.sk_fwd)
       sk_fwd();
-  }, [playerState.state]);
 
-  useEffect(() => {
-    console.log('playlist updated', playlist);
-  }, [playlist]);
+    if(shouldStartPlaying) setShouldStartPlaying(false);
+  }, [playerState.state]);
 
   useEffect(() => {
     const audioElem = audioRef.current;
@@ -227,8 +238,8 @@ const onChangeVolume = (value: number) => {
         {/* album box and details & main controls */}
         <PlayerCurrentlyPlaying playerState={playerState} setPlayerState={setPlayerState} maxHeight={maxHeight} />
         <PlayerTrackInfo currentTime={currentTime} maxTime={maxTime} />
-        <PlayerAdditionalControls volume={playerState.volume} onChangeVolume={onChangeVolume} />
         {/* todo: revise this styling. additional things, perhaps */}
+        <PlayerAdditionalControls volume={playerState.volume} onChangeVolume={onChangeVolume} />
         
       </SimpleGrid>
     </>

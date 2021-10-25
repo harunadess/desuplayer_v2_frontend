@@ -1,5 +1,5 @@
 import { FC } from 'react';
-import { Box, HStack, Text } from '@chakra-ui/layout'; 
+import { AspectRatio, Box, HStack, Text } from '@chakra-ui/layout'; 
 import { Image } from '@chakra-ui/image'; 
 import { ButtonGroup, IconButton } from '@chakra-ui/button';
 import { MdPauseCircleOutline, MdPlayCircleOutline, MdSkipNext, MdSkipPrevious } from 'react-icons/md';
@@ -21,7 +21,9 @@ const PlayerCurrentlyPlaying: FC<Props> = (props) => {
           <HStack spacing='4'>
             <Box key={`Player_${playerState.currentSong?.Title}_${playerState.currentSong?.Artist}`}>
               {(playerState.currentSong?.Picturetype && playerState.currentSong?.Picturedata) &&
-                <Image margin='auto' h={maxHeight} src={`data:image/${playerState.currentSong?.Picturetype};base64,${playerState.currentSong?.Picturedata}`} />
+                <AspectRatio h={maxHeight} ratio={1/1}>
+                  <Image margin='auto' h={maxHeight} src={`data:image/${playerState.currentSong?.Picturetype};base64,${playerState.currentSong?.Picturedata}`} />
+                </AspectRatio>
               }
               {(!playerState.currentSong?.Picturetype || !playerState.currentSong?.Picturedata) &&
                 <Box margin='auto' width={maxHeight} h={maxHeight} backgroundColor='gray.200' >

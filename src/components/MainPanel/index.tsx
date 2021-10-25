@@ -29,10 +29,12 @@ const MainPanel: FC = () => {
   const [selected, setSelected] = useState<{} | Album>({});
   const [contextMenu, setContextMenu] = useState(() => contextMenuOptions);
   const [playlist, setPlaylist] = useState<Song[]>([]);
+  const [shouldStartPlaying, setShouldStartPlaying] = useState(false);
 
   // display
   const [isLoading, setIsLoading] = useState(true);
   const [isAlbumDrawerOpen, setAlbumDrawerOpen] = useState(false);
+
 
   useEffect(() => {
     requests.setApi(server);
@@ -87,6 +89,7 @@ const MainPanel: FC = () => {
     }
     setSelected({});
     setAlbumDrawerOpen(false);
+    setShouldStartPlaying(true);
   };
 
   const onPlayNext = (item: Playable) => {
@@ -134,7 +137,7 @@ const MainPanel: FC = () => {
           padding="4" overflow="hidden">
           <ItemList items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} selected={selected}
             setSelected={setSelected} />
-          <Player playlist={playlist} setPlaylist={setPlaylist} />
+          <Player playlist={playlist} setPlaylist={setPlaylist} shouldStartPlaying={shouldStartPlaying} setShouldStartPlaying={setShouldStartPlaying} />
         </VStack>
       }
       <AlbumDrawer contextMenuOptions={contextMenu} isOpen={isAlbumDrawerOpen} selectedAlbum={selected} onClose={onAlbumDrawerClose}
