@@ -32,6 +32,8 @@ interface Props {
   setShouldStartPlaying: (_: boolean | ((prevState: boolean) => boolean)) => void;
 }
 
+// todo: this needs refactored to fuck
+//   i don't know if you can have a helper or something
 const Player: FC<Props> = (props) => {
   const { playlist, setPlaylist, shouldStartPlaying, setShouldStartPlaying } = props;
 
@@ -56,6 +58,12 @@ const Player: FC<Props> = (props) => {
         audioRef.current.play();
       }
       return;
+    }
+
+    if(forcePlay) {
+      if(audioRef.current) {
+        audioRef.current.pause();
+      }
     }
 
     const next = playlist[playerState.index];
@@ -157,7 +165,7 @@ const Player: FC<Props> = (props) => {
           source: '',
           index: 0,
           state: playerStates.end
-        })
+        });
       } else {
         setPlayerState({
           ...playerState,
@@ -240,7 +248,7 @@ const onChangeVolume = (value: number) => {
         <PlayerTrackInfo currentTime={currentTime} maxTime={maxTime} />
         {/* todo: revise this styling. additional things, perhaps */}
         <PlayerAdditionalControls volume={playerState.volume} onChangeVolume={onChangeVolume} />
-        
+
       </SimpleGrid>
     </>
   );
