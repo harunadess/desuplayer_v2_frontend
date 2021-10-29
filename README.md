@@ -14,4 +14,4 @@ Also had the goal of not being as slow as molasses, and resource heavy - but the
 - In the root of the folder, run the following build command: `yarn run build`
 - From there, you can run `node ./serveBuild.js`
 - It will be accessible through the link in the terminal that should appear
-  - It should default to `[http://localhost:8080](http://localhost:8080)` but you can change this if you want.
+  - It should default to [http://localhost:8080](http://localhost:8080) but you can change this if you want.
