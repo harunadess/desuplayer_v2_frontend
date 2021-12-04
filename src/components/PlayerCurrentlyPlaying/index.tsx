@@ -10,7 +10,7 @@ import { playerStates } from '../../constants';
 interface Props {
     playerState: PlayerState;
     setPlayerState: (_: PlayerState | ((prevState: PlayerState) => PlayerState)) => void;
-    maxHeight: number;
+    maxHeight: string;
 }
 
 const PlayerCurrentlyPlaying: FC<Props> = (props) => {
@@ -21,8 +21,8 @@ const PlayerCurrentlyPlaying: FC<Props> = (props) => {
           <HStack spacing='4'>
             <Box key={`Player_${playerState.currentSong?.Title}_${playerState.currentSong?.Artist}`}>
               {(playerState.currentSong?.Picturetype && playerState.currentSong?.Picturedata) &&
-                <AspectRatio maxW={maxHeight} ratio={1}>
-                  <Image margin='auto' src={`data:image/${playerState.currentSong?.Picturetype};base64,${playerState.currentSong?.Picturedata}`} />
+                <AspectRatio maxW={maxHeight} w={maxHeight} ratio={1}>
+                  <Image src={`data:image/${playerState.currentSong?.Picturetype};base64,${playerState.currentSong?.Picturedata}`} objectFit='cover' />
                 </AspectRatio>
               }
               {(!playerState.currentSong?.Picturetype || !playerState.currentSong?.Picturedata) &&

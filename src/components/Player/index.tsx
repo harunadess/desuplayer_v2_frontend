@@ -8,7 +8,7 @@ import PlayerCurrentlyPlaying from '../PlayerCurrentlyPlaying';
 import PlayerTrackInfo from '../PlayerTrackInfo';
 import PlayerAdditionalControls from '../PlayerAdditionalControls';
 
-const maxHeight = 100;
+const maxHeight = '100px';
 // const layoutSizes = {
 //   mainControls: { h: maxHeight, w: 100 },
 //   albumAndDeets: { h: maxHeight, w: 100 },
@@ -84,13 +84,15 @@ const Player: FC<Props> = (props) => {
       current = songMeta;
     }).finally(() => {
       musicApi.getSong(current.Path).then((songData) => {
+        const dataObj = window.URL.createObjectURL(songData);
         setPlayerState({
           ...playerState,
           state: playerStates.play,
           currentSong: current,
-          source: window.URL.createObjectURL(songData),
+          source: dataObj,
         });
         if(audioRef.current) {
+          audioRef.current.src = dataObj; 
           audioRef.current.volume = playerState.volume;
           audioRef.current.load();
           audioRef.current.play();
@@ -239,9 +241,7 @@ const onChangeVolume = (value: number) => {
   return (
     // todo: this might be a job for regular Grid after all, but instead you figure out how to use it
     <>
-      {playerState.source &&
-        <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={() => setPlayerState({ ...playerState, state: playerStates.end }) } />
-      }
+      <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={() => setPlayerState({ ...playerState, state: playerStates.end }) } hidden />
       <SimpleGrid columns={3} height='15%'>
         {/* album box and details & main controls */}
         <PlayerCurrentlyPlaying playerState={playerState} setPlayerState={setPlayerState} maxHeight={maxHeight} />

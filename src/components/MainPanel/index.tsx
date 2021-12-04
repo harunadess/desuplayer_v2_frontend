@@ -55,7 +55,7 @@ const MainPanel: FC = () => {
         addToQueue: { ...contextMenu.addToQueue, action: onAddToQueue }
       };
     });
-  }, []);
+  }, [server]);
 
   // todo: async
   const buildLibrary = () => {

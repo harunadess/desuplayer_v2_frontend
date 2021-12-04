@@ -46,9 +46,11 @@ const ItemList: FC<Props> = (props) => {
 
   const { contextMenuOptions, items, onClickItem } = props;
   const [layout, setLayout] = useState<GridLayout>(() => ({ cols: 1, rows: 1, data: [[]] }));
+  const [windowDimensions] = useState(() => [window.innerWidth, window.innerHeight]);
 
   useEffect(() => {
-    const cols = window.innerWidth / boxSize;
+    const [width] = windowDimensions;
+    const cols = width / boxSize;
     const newLayout = {
       cols: Math.floor(cols),
       rows: Math.ceil((items?.length || 1) / cols)
@@ -59,11 +61,11 @@ const ItemList: FC<Props> = (props) => {
       data: data
     });
     console.log('data:', data);
-  }, [items.length, window.innerWidth, window.innerHeight]);
+  }, [items, windowDimensions]);
 
   const onClickGridItem = useCallback((item: Album) => {
     onClickItem(item);
-  }, [items]);
+  }, [onClickItem]);
 
   return (
     <FixedSizeGrid

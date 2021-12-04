@@ -15,12 +15,11 @@ interface Props {
 const albumSelected = (item: Album | {}): item is Album => (item as Album).Songs !== undefined;
 
 const AlbumDrawer: FC<Props> = (props) => {
-  const { contextMenuOptions, isOpen, selectedAlbum, setSelected, onClose } = props;
+  const { contextMenuOptions, isOpen, selectedAlbum, onClose } = props;
 
   const [songs, setSongs] = useState<Song[]>([]);
   
   useEffect(() => {
-    console.log('selectedAlbum updated', contextMenuOptions.addToQueue.action.toString());
     if(albumSelected(selectedAlbum)) {
       const sortedSongs = Object.keys(selectedAlbum.Songs)
       .map(k => selectedAlbum.Songs[k])

@@ -7,9 +7,15 @@ interface Props {
   maxTime: number;
 }
 
-const formatTime = (seconds: number): string => {
-  const s = (seconds % 60);
-  const m = ((seconds - s) / 60) % 60;
+const formatTime = (inputSeconds: number | undefined): string => {
+  if(inputSeconds == null) return '00:00';
+  const seconds = inputSeconds!;
+  let s = (seconds % 60);
+  let m = ((seconds - s) / 60) % 60;
+
+  if(Number.isNaN(s)) s = 0;
+  if(Number.isNaN(m)) m = 0;
+
   return `${m < 10 ? `0${m.toFixed(0)}` : m.toFixed(0)}:${s < 10 ? `0${s.toFixed(0)}` : `${s.toFixed(0)}`}`;
 };
 
@@ -19,8 +25,8 @@ const PlayerTrackInfo: FC<Props> = (props) => {
     return (
       <Box>
         <HStack marginTop='4vh'>
-          <Text fontSize='sm' w='20%'>{formatTime(currentTime)} / {formatTime(maxTime)}</Text>
-          <Slider min={0} max={maxTime} value={currentTime}>
+          <Text fontSize='sm' w='25%' whiteSpace='nowrap'>{formatTime(currentTime)} / {formatTime(maxTime)}</Text>
+          <Slider min={0} max={maxTime || 0} value={currentTime || 0}>
             <SliderTrack>
               <SliderFilledTrack />
             </SliderTrack>
