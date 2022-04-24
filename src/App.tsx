@@ -17,10 +17,7 @@ const preventContextMenu = (event: Event) => {
 const App: FC = () => {
 
   useEffect(() => {
-    console.log('sizing', window.innerWidth, window.innerHeight);
-
     document.addEventListener('contextmenu', preventContextMenu);
-
     return (() => {
       document.removeEventListener('contextmenu', preventContextMenu);
     });

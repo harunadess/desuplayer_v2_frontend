@@ -1,5 +1,5 @@
 import { useState, useEffect, FC } from 'react';
-import { StackDivider, VStack, Box } from '@chakra-ui/layout';
+import { StackDivider, VStack, Box, StackItem } from '@chakra-ui/layout';
 import { Center, Text } from '@chakra-ui/react';
 import * as requests from '../../helpers/request';
 import { default as libraryApi } from '../../api/library';
@@ -116,7 +116,7 @@ const MainPanel: FC = () => {
   };
 
   return (
-    <Box>
+    <Box alignItems='center' marginLeft={[0,4]}>
       <LibraryConfig buildLibrary={buildLibrary} getAllArtists={musicApi.getAllArtists} onChangeApi={onChangeApi}
         musicDir={musicDir} setMusicDir={setMusicDir} server={server} />
       {isLoading &&
@@ -132,11 +132,10 @@ const MainPanel: FC = () => {
           </Center>
         </Box>
       }
+      {/* literally everything below the boxes at the top */}
       {!isLoading && library.length > 0 &&
-        <VStack align="stretch" divider={<StackDivider borderColor="gray.200" />} spacing="4" w="100vw" h="90vh"
-          padding="4" overflow="hidden">
-          <ItemList items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} selected={selected}
-            setSelected={setSelected} />
+        <VStack divider={<StackDivider borderColor="gray.200" />} w="95vw" h="90vh" spacing='4'>
+          <ItemList items={library} onClickItem={onClickAlbum} contextMenuOptions={contextMenu} selected={selected} setSelected={setSelected} />
           <Player playlist={playlist} setPlaylist={setPlaylist} shouldStartPlaying={shouldStartPlaying} setShouldStartPlaying={setShouldStartPlaying} />
         </VStack>
       }

@@ -9,6 +9,7 @@ import PlayerTrackInfo from '../PlayerTrackInfo';
 import PlayerAdditionalControls from '../PlayerAdditionalControls';
 
 const maxHeight = '100px';
+const maxNextSongs = 64;
 // const layoutSizes = {
 //   mainControls: { h: maxHeight, w: 100 },
 //   albumAndDeets: { h: maxHeight, w: 100 },
@@ -242,13 +243,12 @@ const onChangeVolume = (value: number) => {
     // todo: this might be a job for regular Grid after all, but instead you figure out how to use it
     <>
       <audio autoPlay={false} src={playerState.source} ref={audioRef} onEnded={() => setPlayerState({ ...playerState, state: playerStates.end }) } hidden />
-      <SimpleGrid columns={3} height='15%'>
+      <SimpleGrid columns={3} spacing='64'>
         {/* album box and details & main controls */}
         <PlayerCurrentlyPlaying playerState={playerState} setPlayerState={setPlayerState} maxHeight={maxHeight} />
         <PlayerTrackInfo currentTime={currentTime} maxTime={maxTime} />
         {/* todo: revise this styling. additional things, perhaps */}
-        <PlayerAdditionalControls volume={playerState.volume} onChangeVolume={onChangeVolume} />
-
+        <PlayerAdditionalControls volume={playerState.volume} onChangeVolume={onChangeVolume} songsUpNext={playlist.slice(playerState.index, maxNextSongs)} />
       </SimpleGrid>
     </>
   );

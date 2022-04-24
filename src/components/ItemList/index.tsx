@@ -5,6 +5,7 @@ import { Image } from '@chakra-ui/image';
 import ContextMenu from '../ContextMenu';
 import { ContextMenuOptions, playlistContextMenuId } from '../../constants';
 import { Album } from '../../types/data/library';
+import { debounce } from '../../helpers/debounce';
 
 const gridStyle = { marginLeft: '3%' };
 
@@ -41,12 +42,25 @@ const ItemList: FC<Props> = (props) => {
   const boxSize = 250;
   const defaultSize = 200;
   const defaultTextOffset = 84;
+  const resizeDebounceMs = 100;
 
   const extraPad = 32;
 
   const { contextMenuOptions, items, onClickItem } = props;
   const [layout, setLayout] = useState<GridLayout>(() => ({ cols: 1, rows: 1, data: [[]] }));
-  const [windowDimensions] = useState(() => [window.innerWidth, window.innerHeight]);
+  const [windowDimensions, setWindowDimensions] = useState(() => [window.innerWidth, window.innerHeight]);
+
+  useEffect(() => {
+    const debouncedResize = debounce(() => {
+      setWindowDimensions([window.innerWidth, window.innerHeight]);
+    }, resizeDebounceMs);
+
+    window.addEventListener('resize', debouncedResize);
+
+    return () => {
+      window.removeEventListener('resize', debouncedResize);
+    };
+  });
 
   useEffect(() => {
     const [width] = windowDimensions;
@@ -73,8 +87,8 @@ const ItemList: FC<Props> = (props) => {
       rowCount={layout.rows}
       columnWidth={boxSize}
       rowHeight={boxSize + extraPad}
-      width={window.innerWidth || 0}
-      height={window.innerHeight || 0}
+      width={windowDimensions[0] || 0}
+      height={windowDimensions[1] || 0}
       // todo: come back and see if you can resolve
       // itemCount={items.length}
       style={gridStyle}
@@ -84,7 +98,7 @@ const ItemList: FC<Props> = (props) => {
         if (!item) return null;
         return (
           <Box key={`${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} padding='2' margin='4' w={boxSize} h={boxSize} cursor='pointer'
-            onClick={() => onClickGridItem(item)} style={style}
+            onClick={() => onClickGridItem(item)} style={style} alignItems='center'
           >
             <ContextMenu id={`${playlistContextMenuId}_${item.Title}_${item.Artist}_${rowIndex + columnIndex}`} options={contextMenuOptions} selected={item}>
               {(item.Picturetype && item.Picturedata) &&

@@ -4,7 +4,7 @@ import MainPanel from '../MainPanel';
 
 const Main: FC = () => {
   return (
-    <Flex >
+    <Flex>
       <MainPanel />
     </Flex>
   );
